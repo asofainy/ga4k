@@ -8,9 +8,10 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          namespace: gitlab
         spec:
           containers: 
-          namespace: gitlab
           - name: redmine-repo
             image: debian:10
             imagePullPolicy: IfNotPresent
