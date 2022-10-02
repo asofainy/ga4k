@@ -1,0 +1,11 @@
+gitops:
+  manifest_projects:
+  - id: gitlab-instance-69044ebd/ga4k
+    default_namespace: test
+    paths:
+    - glob: '/infra/*.yaml'
+    
+ci_access:
+  groups:
+    - id: gitlab-instance-69044ebd
+
