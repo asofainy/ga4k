@@ -6,6 +6,6 @@ gitops:
     - glob: '/infra/*.yaml'
     
 ci_access:
-  groups:
-    - id: gitlab-instance-69044ebd
+  projects:
+    - id: path/to/project
 
