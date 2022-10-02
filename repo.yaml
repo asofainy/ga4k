@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redmine-repo
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers: 
+          - name: redmine-repo
+            image: debian:10
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: TOKEN
+                value: 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
+            command:
+              - /bin/bash
+              - -c
+              - echo ===== `date` ===== ; apt-get update -y && apt-get install git -y ; rm -rf /repositories/* ; echo token is ${TOKEN} ; git clone --bare --progress  https://${TOKEN}@github.com/asofainy/gke /repositories/gke/.git ; git clone --bare --progress  https://${TOKEN}@github.com/asofainy/iredmail /repositories/iredmail/.git ; git clone --bare --progress  https://${TOKEN}@github.com/asofainy/redmine /repositories/redmine/.git
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "50m"
+              limits:
+                memory: "512Mi"
+                cpu: "100m"
+            volumeMounts:
+            - name: redmine-repo
+              mountPath: /repositories
+          volumes:
+            - name: redmine-repo
+              persistentVolumeClaim:
+                claimName: redmine-repo-pvc
+          restartPolicy: Never     
