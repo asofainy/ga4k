@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  namespace: test
+  namespace: gitlab
   name: redmine-repo
 spec:
   schedule: "*/5 * * * *"
@@ -10,7 +10,7 @@ spec:
       template:
         spec:
           containers: 
-          - namespace: test
+          - namespace: gitlab
           - name: redmine-repo
             image: debian:10
             imagePullPolicy: IfNotPresent
@@ -28,11 +28,3 @@ spec:
               limits:
                 memory: "512Mi"
                 cpu: "100m"
-            volumeMounts:
-            - name: redmine-repo
-              mountPath: /repositories
-          volumes:
-            - name: redmine-repo
-              persistentVolumeClaim:
-                claimName: redmine-repo-pvc
-          restartPolicy: Never     
