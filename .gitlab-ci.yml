@@ -38,6 +38,8 @@ docker-build:
           - Dockerfile
           
 deploy:
+  tags :
+    - docker
   image:
     name: bitnami/kubectl:latest
     entrypoint: ['']
