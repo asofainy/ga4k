@@ -46,5 +46,5 @@ deploy:
   script:
     - kubectl config get-contexts
     - kubectl config use-context gitlab-instance-69044ebd/ga4k:gitlab-agent-1
-    - kubectl get pods
+    - kubectl get pods -n gitlab
 
