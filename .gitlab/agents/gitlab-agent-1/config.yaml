@@ -1,11 +1,10 @@
 gitops:
   manifest_projects:
   - id: gitlab-instance-69044ebd/ga4k
-    default_namespace: test
+    default_namespace: gitlab-agent
     paths:
     - glob: '/infra/*.yaml'
     
 ci_access:
   projects:
-    - id: path/to/project
-
+    - id: gitlab-instance-69044ebd/ga4k
