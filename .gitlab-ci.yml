@@ -41,5 +41,6 @@ deploy:
   image:
     name: bitnami/kubectl:latest
   script:
+    - kubectl config get-contexts
     - kubectl get pods -n gitlab
 
