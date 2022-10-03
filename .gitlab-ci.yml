@@ -38,9 +38,6 @@ docker-build:
           - Dockerfile
           
 deploy:
-  image:
-    name: bitnami/kubectl:latest
-    entrypoint: ['']
   script:
     - kubectl get pods -n gitlab
 
