@@ -45,5 +45,6 @@ deploy:
     entrypoint: ['']
   script:
     - kubectl config get-contexts
+    - kubectl config use context  gitlab-instance-69044ebd/redmine:gke
     - kubectl get pods
 
