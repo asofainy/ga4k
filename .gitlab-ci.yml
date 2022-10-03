@@ -42,5 +42,5 @@ deploy:
     name: bitnami/kubectl:latest
     entrypoint: ['']
   script:
-    - kubectl get pods
+    - kubectl get pods -n gitlab
 
