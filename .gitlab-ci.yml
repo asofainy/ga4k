@@ -39,6 +39,8 @@ docker-build:
           
 deploy:
   image:
+    tags:
+      - general
     name: bitnami/kubectl:latest
     entrypoint: ['']
   script:
