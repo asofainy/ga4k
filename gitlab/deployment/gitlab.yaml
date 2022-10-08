@@ -19,9 +19,8 @@ spec:
         image: gitlab/gitlab-ee
         env:
           - name: GITLAB_OMNIBUS_CONFIG
-            value: "external_url 'http://34.175.231.188/';gitlab_rails['registry_enabled'] = true;"
+            value: "external_url 'http://34.175.176.112/';gitlab_rails['registry_enabled'] = true;"
         ports:
-        - containerPort: 22
         - containerPort: 80
         - containerPort: 443
         volumeMounts:
