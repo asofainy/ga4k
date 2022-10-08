@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: calibre-sync-books
+spec:
+  schedule: "15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers: 
+          - name: calibre-sync-books
+            image: alpine
+            imagePullPolicy: Always
+            env:
+              - name: GITLAB_TOKEN
+                value: "glpat-bJMyn9vnkMsaMZyrAoZs"
+              - name: GITLAB_IP
+                value: "34.175.231.188"
+            command:
+              - /bin/bash
+              - -c
+              - apk update ; apk add git ; git clone --bare --progress http://oauth2:${GITLAB_TOKEN}@${GITLAB_IP}/gitlab-instance-69044ebd/calibre-web.git /tmp/calibre-web/.git ; chmod +x /tmp/calibre-web/build/scripts/jobs/sync-books.sh ; /tmp/calibre-web/build/scripts/jobs/sync-books.sh
+            volumeMounts:
+            - name: books
+              mountPath: /books
+          volumes:
+            - name: books
+              persistentVolumeClaim:
+                claimName: books-pvc
+          restartPolicy: OnFailure  
