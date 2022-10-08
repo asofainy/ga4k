@@ -3,20 +3,20 @@ kind: CronJob
 metadata:
   name: calibre-sync-books
 spec:
-  schedule: "15 * * * *"
+  schedule: "*/2 * * * *"
   jobTemplate:
     spec:
       template:
         spec:
           containers: 
           - name: calibre-sync-books
-            image: alpine
+            image: alpine:latest
             imagePullPolicy: Always
             env:
               - name: GITLAB_TOKEN
                 value: "glpat-bJMyn9vnkMsaMZyrAoZs"
               - name: GITLAB_URL
-                value: "gitlab.gitlab.svc.cluster.local"
+                value: "gitlab-service.gitlab.svc.cluster.local"
             command:
               - /bin/bash
               - -c
