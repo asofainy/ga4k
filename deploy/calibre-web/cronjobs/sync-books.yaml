@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: calibre-sync-books
 spec:
-  schedule: "*/2 * * * *"
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       template:
@@ -28,4 +28,4 @@ spec:
             - name: books
               persistentVolumeClaim:
                 claimName: books-pvc
-          restartPolicy: OnFailure  
+          restartPolicy: Never
