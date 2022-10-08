@@ -2,20 +2,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: gitlab
-  name: gitlab-runner-docker-1
+  name: gitlab-runner-docker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gitlab-runner-docker-1
+      app: gitlab-runner-docker
   template:
     metadata:
       namespace: gitlab
       labels:
-        app: gitlab-runner-docker-1
+        app: gitlab-runner-docker
     spec:
       containers:
-      - name: gitlab-runner-docker-1
+      - name: gitlab-runner-docker
         image: gitlab/gitlab-runner
         env:
           - name: TOKEN
