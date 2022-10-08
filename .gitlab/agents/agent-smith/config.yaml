@@ -1,10 +1,10 @@
 gitops:
   manifest_projects:
-  - id: gitlab-instance-69044ebd/ga4k
+  - id: gitlab-instance-69044ebd
     default_namespace: default
     paths:
       # Read all YAML files from this directory.
-    - glob: 'gitlab-instance-69044ebd/calibre-web/deployment/**/*.yaml'
+    - glob: 'calibre-web/deployment/**/*.yaml'
       # Read all .yaml files from team2/apps and all subdirectories.
     reconcile_timeout: 3600s
     dry_run_strategy: none
