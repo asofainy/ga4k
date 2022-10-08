@@ -4,7 +4,7 @@ gitops:
     default_namespace: default
     paths:
       # Read all YAML files from this directory.
-    - glob: 'calibre-web/deployment/**/*.yaml'
+    - glob: '**/**/*.yaml'
       # Read all .yaml files from team2/apps and all subdirectories.
     reconcile_timeout: 3600s
     dry_run_strategy: none
