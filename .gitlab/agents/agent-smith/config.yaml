@@ -1,6 +1,6 @@
 gitops:
   manifest_projects:
-  - id: gitlab-instance-69044ebd/ga4k"
+  - id: gitlab-instance-69044ebd/ga4k/agent-smith"
     default_namespace: default
     paths:
       # Read all YAML files from this directory.
