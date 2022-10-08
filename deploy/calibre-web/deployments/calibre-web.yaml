@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: calibre-web
-        image: linuxserver/calibre-web:0.6.19-ls177
+        image: asofainy/calibre-web:1.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8083
