@@ -28,7 +28,7 @@ spec:
         command:
           - /bin/sh
           - -c
-          - "apk add gitlab-runner ; gitlab-runner -l debug register --non-interactive --url http://${GITLAB_LOADBALANCER_HTTP_SERVICE_HOST} --registration-token ${TOKEN} --executor docker --docker-image alpine --name $HOSTNAME --docker-pull-policy always --locked=false --run-untagged=false --docker-privileged=true --limit 0 --tag-list runner-docker ; gitlab-runner verify ; gitlab-runner run ; tail -f /dev/null"
+          - "apk add gitlab-runner ; gitlab-runner -l debug register --non-interactive --url http://gitlab-service.gitlab.svc.cluster.local --registration-token ${TOKEN} --executor docker --docker-image alpine --name $HOSTNAME --docker-pull-policy always --locked=false --run-untagged=false --docker-privileged=true --limit 0 --tag-list runner-docker ; gitlab-runner verify ; gitlab-runner run ; tail -f /dev/null"
       volumes:
         - name: socket
           hostPath:
