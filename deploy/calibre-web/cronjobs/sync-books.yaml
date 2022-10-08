@@ -3,14 +3,14 @@ kind: CronJob
 metadata:
   name: calibre-sync-books
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "0 * * * *"
   jobTemplate:
     spec:
       template:
         spec:
           containers: 
           - name: calibre-sync-books
-            image: alpine:latest
+            image: debian:10
             imagePullPolicy: Always
             env:
               - name: GITLAB_TOKEN
@@ -20,7 +20,7 @@ spec:
             command:
               - /bin/bash
               - -c
-              - apk update ; apk add git ; git clone --bare --progress http://oauth2:${GITLAB_TOKEN}@${GITLAB_URL}/gitlab-instance-69044ebd/calibre-web.git /tmp/calibre-web/.git ; chmod +x /tmp/calibre-web/build/scripts/jobs/sync-books.sh ; /tmp/calibre-web/build/scripts/jobs/sync-books.sh
+              - apt-get update && apt-get install git -y ; git clone --progress http://oauth2:${GITLAB_TOKEN}@${GITLAB_URL}/gitlab-instance-69044ebd/calibre-web.git /tmp/calibre-web ; chmod +x /tmp/calibre-web/build/scripts/jobs/sync-books.sh ; /tmp/calibre-web/build/scripts/jobs/sync-books.sh
             volumeMounts:
             - name: books
               mountPath: /books
