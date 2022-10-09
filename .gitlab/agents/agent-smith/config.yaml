@@ -1,5 +1,4 @@
 #https://docs.gitlab.com/ee/user/clusters/agent/gitops.html#gitops-configuration-reference
-
 gitops:
   manifest_projects:
   - id: gitlab-instance-69044ebd/ga4k
