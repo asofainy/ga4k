@@ -2,7 +2,7 @@
 gitops:
   manifest_projects:
   - id: gitlab-instance-69044ebd/ga4k
-    default_namespace: default
+    default_namespace: test
     paths:
     - glob: '/deploy/default/**/*.yaml'
   - id: gitlab-instance-69044ebd/ga4k
