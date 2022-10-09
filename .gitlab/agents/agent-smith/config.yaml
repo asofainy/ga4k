@@ -19,7 +19,6 @@ gitops:
     prune_timeout: 3600s
     prune_propagation_policy: foreground
     inventory_policy: must_match
-
 observability:
   logging:
     level: debug
