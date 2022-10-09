@@ -5,9 +5,9 @@ gitops:
   - id: gitlab-instance-69044ebd/ga4k
     default_namespace: default
     paths:
-    - glob: '/default/**/*.yaml'
-    - glob: '/test/**/*.yaml'
-    - glob: '/production/**/*.yaml'
+    - glob: 'default/**/*.yaml'
+    - glob: 'test/**/*.yaml'
+    - glob: 'production/**/*.yaml'
 
     reconcile_timeout: 3600s
     dry_run_strategy: none
@@ -15,7 +15,7 @@ gitops:
     prune_timeout: 3600s
     prune_propagation_policy: foreground
     inventory_policy: must_match
-    
+
 observability:
   logging:
     level: debug
