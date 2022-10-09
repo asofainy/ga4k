@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: gitlab
+  name: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      namespace: gitlab
+      labels:
+        app: gitlab
+    spec:
+      containers:
+      - name: gitlab
+        image: gitlab/gitlab-ee
+        env:
+          - name: GITLAB_OMNIBUS_CONFIG
+            value: "external_url 'http://34.175.176.112/'; gitlab_rails['registry_enabled'] = true;"
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: gitlab-data
+          mountPath: /var/opt/gitlab
+        - name: gitlab-config
+          mountPath: /etc/gitlab
+        - name: gitlab-backup
+          mountPath: /backup
+      volumes:
+        - name: gitlab-data
+          persistentVolumeClaim:
+            claimName: gitlab-data-pvc
+        - name: gitlab-config
+          persistentVolumeClaim:
+            claimName: gitlab-config-pvc
+        - name: gitlab-backup
+          persistentVolumeClaim:
+            claimName: gitlab-backup-pvc
