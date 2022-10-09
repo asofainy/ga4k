@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: production
   name: redmine
 spec:
   replicas: 1
@@ -9,6 +10,7 @@ spec:
       app: redmine
   template:
     metadata:
+      namespace: production
       labels:
         app: redmine
     spec:
