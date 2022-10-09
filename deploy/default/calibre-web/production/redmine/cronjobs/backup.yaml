@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redmine-backup
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers: 
+          - name: redmine-backup
+            image: mysql:5.7-debian
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: app
+                value: redmine
+              - name: host
+                value: mysql.default.svc.cluster.local
+              - name: database
+                value: redmine_production
+              - name: username
+                value: root
+              - name: MYSQL_PWD
+                value: My5QL_p@55
+            command:
+              - /bin/bash
+              - -c
+              - mkdir -p /backup/$app ; file=dump_`date +'%Y%m%d_%H%M%S'`.sql.gz ; mysqldump -h $host -u  $username --routines --triggers $database | gzip -c > /backup/$app/$file ; echo Dump created $file ; ls -ltah  /backup/$app 
+            volumeMounts:
+            - name: mysql-backup
+              mountPath: /backup
+          volumes:
+            - name: mysql-backup
+              persistentVolumeClaim:
+                claimName: mysql-pvc-backup
+          restartPolicy: OnFailure
+
+        

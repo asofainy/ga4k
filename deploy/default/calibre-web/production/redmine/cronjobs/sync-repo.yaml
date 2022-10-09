@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redmine-sync-repo
+spec:
+  schedule: "15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers: 
+          - name: redmine-sync-repo
+            image: asofainy/redmine:ci
+            imagePullPolicy: Always
+            command:
+              - /bin/bash
+              - -c
+              - /usr/src/redmine/toolbox/scripts/jobs/sync-repo.sh
+            volumeMounts:
+            - name: redmine-repo
+              mountPath: /repositories
+          volumes:
+            - name: redmine-repo
+              persistentVolumeClaim:
+                claimName: redmine-repo-pvc
+          restartPolicy: OnFailure  
