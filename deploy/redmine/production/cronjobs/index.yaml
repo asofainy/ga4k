@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redmine-index
+spec:
+  schedule: "20 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers: 
+          - name: redmine-index
+            image: asofainy/redmine:ci
+            imagePullPolicy: Always
+            command:
+              - /bin/bash
+              - -c
+              - ls -ltra /usr/src/redmine ; $ROOT/toolbox/scripts/jobs/index.sh
+            volumeMounts:
+            - name: redmine-data
+              mountPath: /usr/src/redmine
+            - name: redmine-repo
+              mountPath: /repositories
+          volumes:
+            - name: redmine-data
+              persistentVolumeClaim:
+                claimName: redmine-data-pvc
+            - name: redmine-repo
+              persistentVolumeClaim:
+                claimName: redmine-repo-pvc  
+          restartPolicy: OnFailure
+        
