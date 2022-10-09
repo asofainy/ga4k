@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker
+  template:
+    metadata:
+      labels:
+        app: docker
+    spec:
+      containers:
+      - name: docker
+        image: docker:20.10.16
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: socket
+          mountPath: /var/run/docker.sock
+        command:
+          - /bin/sh
+          - -c
+          - "tail -f /dev/null"
+      volumes:
+        - name: socket
+          hostPath:
+            path: /var/run/docker.sock
+
+    

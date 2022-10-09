@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iredmail-loadbalancer-https
+spec:
+  type: LoadBalancer
+  selector:
+    app: iredmail
+  ports:
+  - port: 443
+    targetPort: 443

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iredmail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iredmail
+  template:
+    metadata:
+      labels:
+        app: iredmail
+    spec:
+      containers:
+      - name: iredmail
+        image: asofainy/iredmail:fix
+        imagePullPolicy: Always
+        env:
+        - name: HOSTNAME
+          value: hermes.olympus.local
+        - name: FIRST_MAIL_DOMAIN
+          value: olympus.local
+        - name: FIRST_MAIL_DOMAIN_ADMIN_PASSWORD
+          value: my-secret-password
+        - name: MLMMJADMIN_API_TOKEN
+          value: $(openssl rand -base64 32)
+        - name: ROUNDCUBE_DES_KEY
+          value: $(openssl rand -base64 24)
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "50m"
+          limits:
+            memory: "3Gi"
+            cpu: "100m"
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        - containerPort: 110
+        - containerPort: 995
+        - containerPort: 143
+        - containerPort: 993
+        - containerPort: 25
+        - containerPort: 465
+        - containerPort: 587
+        
