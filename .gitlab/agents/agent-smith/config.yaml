@@ -12,9 +12,14 @@ gitops:
     inventory_policy: must_match
     
   - id: gitlab-instance-69044ebd/ga4k
-    default_namespace: gitlab
+    default_namespace: test
     paths:
-    - glob: '/deploy/gtilab/**/*.yaml'
+    - glob: '/deploy/test/**/*.yaml'
+
+  - id: gitlab-instance-69044ebd/ga4k
+    default_namespace: test
+    paths:
+    - glob: '/deploy/production/**/*.yaml'
 
 observability:
   logging:
