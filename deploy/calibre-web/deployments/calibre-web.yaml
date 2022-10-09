@@ -14,13 +14,11 @@ spec:
     spec:
       containers:
       - name: calibre-web
-        image: asofainy/calibre-web:latest
+        image: asofainy/calibre-web:build
         imagePullPolicy: Always
         ports:
         - containerPort: 8083
         volumeMounts:
-        - name: calibre-web-data
-          mountPath: /config
         - name: books
           mountPath: /books
       volumes:
