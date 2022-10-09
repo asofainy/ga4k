@@ -9,6 +9,10 @@ gitops:
     default_namespace: production
     paths:
     - glob: '/deploy/production/**/*.yaml'
+  - id: gitlab-instance-69044ebd/ga4k
+    default_namespace: test
+    paths:
+    - glob: '/deploy/test/**/*.yaml'
     reconcile_timeout: 3600s
     dry_run_strategy: none
     prune: true
