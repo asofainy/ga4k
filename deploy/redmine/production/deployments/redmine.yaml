@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redmine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redmine
+  template:
+    metadata:
+      labels:
+        app: redmine
+    spec:
+      containers:
+      - name: redmine
+        image: asofainy/redmine:latest
+        imagePullPolicy: Always
+        env:
+        - name: RAILS_ENV
+          value: production
+        - name: REDMINE_DB_MYSQL
+          value: mysql.default.svc.cluster.local
+        - name: REDMINE_DB_PORT
+          value: '3306'
+        - name: REDMINE_DB_USERNAME
+          value: redmine
+        - name: REDMINE_DB_PASSWORD
+          value: my_password
+        - name: REDMINE_DB_DATABASE
+          value: redmine_production
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: redmine-data
+          mountPath: /usr/src/redmine
+        - name: redmine-repo
+          mountPath: /repositories
+      volumes:
+        - name: redmine-data
+          persistentVolumeClaim:
+            claimName: redmine-data-pvc
+        - name: redmine-repo
+          persistentVolumeClaim:
+            claimName: redmine-repo-pvc
