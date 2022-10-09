@@ -11,7 +11,7 @@ gitops:
     - glob: '/test/**/*.yaml'
 
   - id: gitlab-instance-69044ebd/ga4k
-    default_namespace: test
+    default_namespace: production
     paths:
     - glob: '/production/**/*.yaml'
 
