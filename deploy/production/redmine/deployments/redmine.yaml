@@ -50,3 +50,4 @@ spec:
         - name: books
           persistentVolumeClaim:
             claimName: books-pvc
+            
