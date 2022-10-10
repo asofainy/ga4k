@@ -34,16 +34,16 @@ spec:
         ports:
         - containerPort: 3000
         volumeMounts:
-        - name: redmine-data
-          mountPath: /usr/src/redmine
+        - name: redmine-files
+          mountPath: /usr/src/redmine/files
         - name: redmine-repo
           mountPath: /repositories
         - name: books
           mountPath: /books
       volumes:
-        - name: redmine-data
+        - name: redmine-files
           persistentVolumeClaim:
-            claimName: redmine-data-pvc
+            claimName: redmine-files-pvc
         - name: redmine-repo
           persistentVolumeClaim:
             claimName: redmine-repo-pvc
