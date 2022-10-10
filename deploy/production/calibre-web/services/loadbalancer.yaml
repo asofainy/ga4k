@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: Service
-metadata:
+metadata: 
+  namespace: production
   resourceVersion: "1"
   name: calibre-web-loadbalancer
 spec:
