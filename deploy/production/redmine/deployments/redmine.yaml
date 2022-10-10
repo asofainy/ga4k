@@ -38,6 +38,8 @@ spec:
           mountPath: /usr/src/redmine
         - name: redmine-repo
           mountPath: /repositories
+        - name: books
+          mountPath: /books
       volumes:
         - name: redmine-data
           persistentVolumeClaim:
@@ -45,3 +47,6 @@ spec:
         - name: redmine-repo
           persistentVolumeClaim:
             claimName: redmine-repo-pvc
+        - name: books
+          persistentVolumeClaim:
+            claimName: books-pvc
