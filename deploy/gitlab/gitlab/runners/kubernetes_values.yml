@@ -16,5 +16,6 @@ runners:
       [runners.kubernetes]
         image = "ubuntu:16.04"
         service_account = "gitlab-runner-admin"
+        allowed_pull_policies = ["always"]
 
   tags: "runner-kubernetes"
