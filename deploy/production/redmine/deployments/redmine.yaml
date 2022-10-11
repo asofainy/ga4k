@@ -35,11 +35,9 @@ spec:
         - containerPort: 3000
         volumeMounts:
         - name: redmine-files
-          mountPath: /usr/src/redmine/files
+          mountPath: /usr/src/redmine
         - name: redmine-repo
           mountPath: /repositories
-        - name: library
-          mountPath: /library
       volumes:
         - name: redmine-files
           persistentVolumeClaim:
@@ -47,6 +45,3 @@ spec:
         - name: redmine-repo
           persistentVolumeClaim:
             claimName: redmine-repo-pvc
-        - name: library
-          persistentVolumeClaim:
-            claimName: library-pvc
