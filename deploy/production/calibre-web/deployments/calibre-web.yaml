@@ -21,12 +21,12 @@ spec:
         ports:
         - containerPort: 8083
         volumeMounts:
-        - name: books
-          mountPath: /books
+        - name: library
+          mountPath: /library
       volumes:
         - name: calibre-web-data
           persistentVolumeClaim:
             claimName: calibre-web-data-pvc
-        - name: books
+        - name: library
           persistentVolumeClaim:
-            claimName: books-pvc
+            claimName: library-pvc

@@ -7,3 +7,4 @@ parameters:
   type: pd-standard
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
+allowVolumeExpansion: true
