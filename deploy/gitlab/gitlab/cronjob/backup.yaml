@@ -4,17 +4,18 @@ metadata:
   namespace: gitlab
   name: gitlab-backup
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "0 0 * * *"
   jobTemplate:
     spec:
       template:
         spec:
+          serviceAccountName: gitlab-runner-admin
           containers:
           - name: gitlab-backup
-            image: busybox:1.28
+            image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             command:
-            - /bin/sh
+            - /bin/bash
             - -c
-            - date; echo Hello from the Kubernetes cluster
+            - pod=$(kubectl get pods -n gitlab -l app=gitlab --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace gitlab -c gitlab -- /backup/backup.sh ; ls -ltra /backup
           restartPolicy: OnFailure
