@@ -2,20 +2,20 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   namespace: production
-  name: redmine-sync-repo
+  name: redmine-sync-books
 spec:
-  schedule: "*/15 * * * *"
+  schedule: "*/10 * * * *"
   jobTemplate:
     spec:
       template:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: redmine-sync-repo
+          - name: redmine-sync-books
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             command:
             - /bin/bash
             - -c
-            - pod=$(kubectl get pods -n production -l app=redmine --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /usr/src/redmine/toolbox/scripts/sync-repo.sh
+            - pod=$(kubectl get pods -n production -l app=redmine --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /usr/src/redmine/toolbox/scripts/sync-books.sh
           restartPolicy: OnFailure
