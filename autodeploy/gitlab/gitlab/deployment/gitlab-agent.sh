@@ -2,8 +2,9 @@
 
 namespace="gitlab"
 agent_name="agent-smith"
-token="to_NzTshubUAzdWWgHPzxMKuTafmrUebf2cVTkr9Km_RydgUJw"
+token="53oiyjVifPwdWzjeczYuswtrsNWQ3stPrs6Rfxys_TRqogJmwA"
 
+helm delete --namespace gitlab $agent_name
 
 helm uninstall --namespace $namespace $agent_name
 
