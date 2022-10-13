@@ -4,15 +4,15 @@ metadata:
   name: iredmail
 spec:
   ports:
-  - name: http
-    port: 80
-    targetPort: 80
+#  - name: http
+#    port: 80
+#    targetPort: 80
   - name: https
     port: 443
     targetPort: 443
-  - name: smtp
-    port: 25
-    targetPort: 25
+#  - name: smtp
+#    port: 25
+#    targetPort: 25
   - name: smtps
     port: 587
     targetPort: 587

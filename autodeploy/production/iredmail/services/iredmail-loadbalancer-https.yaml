@@ -4,6 +4,7 @@ metadata:
   name: iredmail-loadbalancer-https
 spec:
   type: LoadBalancer
+  loadBalancerIP: 34.175.185.121
   selector:
     app: iredmail
   ports:

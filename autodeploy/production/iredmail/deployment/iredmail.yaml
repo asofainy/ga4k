@@ -28,13 +28,6 @@ spec:
           value: $(openssl rand -base64 32)
         - name: ROUNDCUBE_DES_KEY
           value: $(openssl rand -base64 24)
-        resources:
-          requests:
-            memory: "2Gi"
-            cpu: "50m"
-          limits:
-            memory: "3Gi"
-            cpu: "100m"
         ports:
         - containerPort: 80
         - containerPort: 443
