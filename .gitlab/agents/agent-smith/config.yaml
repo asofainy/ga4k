@@ -5,7 +5,7 @@ gitops:
   - id: gitlab-instance-69044ebd/ga4k
     default_namespace: default
     paths:
-    - glob: '/autodeploy/**/*.yaml'
+    - glob: '/deploy/**/*.yaml'
     reconcile_timeout: 3600s
     dry_run_strategy: none
     prune: true
