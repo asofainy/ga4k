@@ -9,12 +9,13 @@ spec:
       app: iredmail
   template:
     metadata:
+      namespace: production
       labels:
         app: iredmail
     spec:
       containers:
       - name: iredmail
-        image: asofainy/iredmail:fix
+        image: asofainy/iredmail:ci
         imagePullPolicy: Always
         env:
         - name: HOSTNAME
