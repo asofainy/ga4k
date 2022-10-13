@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: production
   name: redmine-files-pvc
 spec:
   storageClassName: custom

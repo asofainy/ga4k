@@ -49,5 +49,5 @@ spec:
             claimName: redmine-repo-pvc
         - name: redmine-books
           persistentVolumeClaim:
-            claimName: redmine-books
+            claimName: redmine-books-pvc
 
