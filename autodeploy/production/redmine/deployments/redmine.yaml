@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: redmine
-        image: asofainy/redmine
+        image: asofainy/redmine:ci
         imagePullPolicy: Always
         env:
         - name: RAILS_ENV
