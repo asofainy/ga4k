@@ -15,4 +15,3 @@ gitops:
 observability:
   logging:
     level: debug
-    rpc_level: warning
