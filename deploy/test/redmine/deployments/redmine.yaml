@@ -21,15 +21,30 @@ spec:
         env:
         - name: RAILS_ENV
           value: test
-        - name: REDMINE_DB_MYSQL
-          value: mysql.default.svc.cluster.local
-        - name: REDMINE_DB_PORT
-          value: '3306'
-        - name: REDMINE_DB_USERNAME
-          value: redmine
-        - name: REDMINE_DB_PASSWORD
-          value: my_password
-        - name: REDMINE_DB_DATABASE
-          value: redmine_test
         ports:
         - containerPort: 3000
+        volumeMounts:
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/configuration.yml
+          subPath: configuration.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/database.yml
+          subPath: database.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/settings.yml
+          subPath: settings.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/application.rb
+          subPath: application.rb
+        - name: redmine-config
+          mountPath: /opt/toolbox/config/env.yml
+          subPath: env.yml
+        - name: redmine-files
+          mountPath: /usr/src/redmine/files
+      volumes:
+        - name: redmine-config
+          configMap:
+            name: redmine-config
+        - name: redmine-files
+          persistentVolumeClaim:
+            claimName: redmine-files-pvc

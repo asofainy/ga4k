@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: production
   name: iredmail
 spec:
   replicas: 1
@@ -15,7 +16,7 @@ spec:
     spec:
       containers:
       - name: iredmail
-        image: asofainy/iredmail:ci
+        image: asofainy/iredmail:latest
         imagePullPolicy: Always
         env:
         - name: HOSTNAME

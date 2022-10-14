@@ -34,6 +34,18 @@ spec:
         ports:
         - containerPort: 3000
         volumeMounts:
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/configuration.yml
+          subPath: configuration.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/database.yml
+          subPath: database.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/settings.yml
+          subPath: settings.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/application.rb
+          subPath: application.rb
         - name: redmine-files
           mountPath: /usr/src/redmine
         - name: redmine-repo
@@ -41,6 +53,9 @@ spec:
         - name: redmine-books
           mountPath: /books
       volumes:
+        - name: redmine-config
+          configMap:
+            name: redmine-config
         - name: redmine-files
           persistentVolumeClaim:
             claimName: redmine-files-pvc
