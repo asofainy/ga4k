@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: redmine
-        image: asofainy/redmine:latest
+        image: asofainy/redmine:ci
         imagePullPolicy: Always        
         resources:
           requests:
@@ -42,6 +42,7 @@ spec:
           subPath: application.rb
         - name: redmine-config
           mountPath: /opt/toolbox/config/env.yml
+          subPath: env.yml
         - name: redmine-files
           mountPath: /usr/src/redmine
         - name: redmine-repo

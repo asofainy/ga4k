@@ -1,7 +1,7 @@
 
 # https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/57e026d7f43f63adc32cdd2b21e6d450abcf0686/values.yaml#L490-500
 
-replicas: 3
+replicas: 2
 
 rbac:
   create: false
