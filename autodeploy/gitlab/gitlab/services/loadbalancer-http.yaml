@@ -5,7 +5,7 @@ metadata:
   name: gitlab-loadbalancer-http
 spec:
   type: LoadBalancer
-  loadBalancerIP: 34.175.231.188
+  loadBalancerIP: 34.175.159.251
   ports:
   - port: 80
     targetPort: 80
