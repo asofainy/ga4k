@@ -18,6 +18,10 @@ spec:
       - name: iredmail
         image: asofainy/iredmail:latest
         imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
         env:
         - name: HOSTNAME
           value: hermes.olympus.local

@@ -17,9 +17,10 @@ spec:
       containers:
       - name: gitlab
         image: gitlab/gitlab-ee
-        env:
-          - name: GITLAB_OMNIBUS_CONFIG
-            value: "external_url 'http://34.175.159.251/'; gitlab_rails['registry_enabled'] = true;"
+        resources:
+          requests:
+            memory: "5Gi"
+            cpu: "1000m"
         ports:
         - containerPort: 80
         - containerPort: 443
@@ -27,16 +28,20 @@ spec:
         - name: gitlab-data
           mountPath: /var/opt/gitlab
         - name: gitlab-config
-          mountPath: /etc/gitlab
+          mountPath: /etc/gitlab/gitlab.rb
+          subPath: gitlab.rb
         - name: gitlab-backup
           mountPath: /backup
       volumes:
         - name: gitlab-data
           persistentVolumeClaim:
             claimName: gitlab-data-pvc
-        - name: gitlab-config
+        - name: gitlab-config-persistent
           persistentVolumeClaim:
             claimName: gitlab-config-pvc
+        - name: gitlab-config
+          configMap:
+            name: gitlab-config
         - name: gitlab-backup
           persistentVolumeClaim:
             claimName: gitlab-backup-pvc

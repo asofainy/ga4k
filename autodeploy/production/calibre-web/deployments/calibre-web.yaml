@@ -18,6 +18,10 @@ spec:
       - name: calibre-web
         image: asofainy/calibre-web:latest
         imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "50m"
         ports:
         - containerPort: 8083
         volumeMounts:
