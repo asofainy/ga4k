@@ -8,7 +8,7 @@ rbac:
   serviceAccountName: gitlab-runner-admin
 
 gitlabUrl: http://gitlab-service.gitlab.svc.cluster.local
-runnerRegistrationToken: -7BNLE_hmBiAsfiXjtbT
+runnerRegistrationToken: kEtSzsjQKqS4n4kS3GWT
 
 runners:
   config: |

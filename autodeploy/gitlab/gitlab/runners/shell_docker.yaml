@@ -19,7 +19,7 @@ spec:
         image: docker
         env:
           - name: TOKEN
-            value: -7BNLE_hmBiAsfiXjtbT
+            value: kEtSzsjQKqS4n4kS3GWT
         securityContext:
           privileged: true
         volumeMounts:

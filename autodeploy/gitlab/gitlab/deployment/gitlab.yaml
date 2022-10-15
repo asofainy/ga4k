@@ -30,18 +30,21 @@ spec:
         - name: gitlab-config
           mountPath: /etc/gitlab/gitlab.rb
           subPath: gitlab.rb
+        - name: gitlab-config-persistent
+          mountPath: /etc/gitlab
         - name: gitlab-backup
           mountPath: /backup
       volumes:
+        - name: gitlab-config
+          configMap:
+            name: gitlab-config
         - name: gitlab-data
           persistentVolumeClaim:
             claimName: gitlab-data-pvc
         - name: gitlab-config-persistent
           persistentVolumeClaim:
             claimName: gitlab-config-pvc
-        - name: gitlab-config
-          configMap:
-            name: gitlab-config
+
         - name: gitlab-backup
           persistentVolumeClaim:
             claimName: gitlab-backup-pvc

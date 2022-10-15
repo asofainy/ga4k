@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: production
-  name: redmine
+  name: apollo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: redmine
+      app: apollo
   template:
     metadata:
       namespace: production
       labels:
-        app: redmine
+        app: apollo
     spec:
       containers:
       - name: redmine
-        image: asofainy/redmine:ci
+        image: asofainy/redmine:latest
         imagePullPolicy: Always        
         resources:
           requests:
@@ -41,25 +41,39 @@ spec:
           mountPath: /usr/src/redmine/config/application.rb
           subPath: application.rb
         - name: redmine-config
-          mountPath: /opt/toolbox/config/env.yml
+          mountPath: /config/env.yml
           subPath: env.yml
         - name: redmine-files
           mountPath: /usr/src/redmine
-        - name: redmine-repo
+        - name: repo
           mountPath: /repositories
-        - name: redmine-books
-          mountPath: /books
+        - name: library
+          mountPath: /library
+      - name: calibre-web
+        image: asofainy/calibre-web:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "50m"
+        ports:
+        - containerPort: 8083
+        volumeMounts:
+        - name: library
+          mountPath: /library
       volumes:
+        - name: repo
+          persistentVolumeClaim:
+            claimName: repo-pvc
+        - name: library
+          persistentVolumeClaim:
+            claimName: library-pvc
         - name: redmine-config
           configMap:
             name: redmine-config
         - name: redmine-files
           persistentVolumeClaim:
             claimName: redmine-files-pvc
-        - name: redmine-repo
+        - name: calibre-web-data
           persistentVolumeClaim:
-            claimName: redmine-repo-pvc
-        - name: redmine-books
-          persistentVolumeClaim:
-            claimName: redmine-books-pvc
-
+            claimName: calibre-web-data-pvc
