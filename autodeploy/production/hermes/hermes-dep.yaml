@@ -16,12 +16,13 @@ spec:
     spec:
       containers:
       - name: iredmail
-        image: asofainy/iredmail:latest
+        image: iredmail/mariadb:stable
         imagePullPolicy: Always
         resources:
           requests:
             memory: "2Gi"
             cpu: "500m"
+
         env:
         - name: HOSTNAME
           value: hermes.olympus.local
@@ -33,14 +34,26 @@ spec:
           value: $(openssl rand -base64 32)
         - name: ROUNDCUBE_DES_KEY
           value: $(openssl rand -base64 24)
+
         ports:
-        - containerPort: 80
         - containerPort: 443
-        - containerPort: 110
-        - containerPort: 995
-        - containerPort: 143
-        - containerPort: 993
-        - containerPort: 25
-        - containerPort: 465
         - containerPort: 587
-        
+
+        volumeMounts:
+        - name: mysql
+          mountPath: /var/lib/mysql
+        - name: mail
+          mountPath: /var/vmail
+          
+      volumes:
+        - name: mysql
+          persistentVolumeClaim:
+            claimName: iredmail-mysql-pvc
+        - name: mail
+          persistentVolumeClaim:
+            claimName: iredmail-mail-pvc
+      
+    
+
+
+      

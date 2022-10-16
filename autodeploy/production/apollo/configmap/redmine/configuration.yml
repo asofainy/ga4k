@@ -7,8 +7,8 @@ default:
       port: 587
       authentication: :plain
       domain: olympus.local
-      user_name: postmaster@olympus.local
-      password: my-secret-password
+      user_name: redmine@olympus.local
+      password: U$jtxEw7LS
  
   attachments_storage_path:
 
