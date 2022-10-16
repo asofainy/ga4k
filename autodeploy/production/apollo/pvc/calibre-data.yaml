@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pvc-config
+metadata: 
+  namespace: production
+  name: calibre-data-pvc
 spec:
   storageClassName: custom
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 128Mi
+      storage: 1Gi

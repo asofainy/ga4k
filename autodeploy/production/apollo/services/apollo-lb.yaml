@@ -2,10 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: production
-  name: redmine-cw
+  name: apollo-loadbalancer
 spec:
+  type: LoadBalancer
+  loadBalancerIP: 34.175.159.251
   selector:
-    app: redmine-cw
+    app: apollo
   ports:
   - name: http-redmine
     port: 3000

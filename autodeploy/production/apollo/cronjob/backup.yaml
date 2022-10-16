@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   namespace: production
-  name: backup-redmine
+  name: backup
 spec:
   schedule: "0 0 * * *"
   jobTemplate:
@@ -11,16 +11,16 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: backup-redmine
+          - name: backup
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             env:
               - name: app
                 value: redmine
               - name: host
-                value: mysql.default.svc.cluster.local
+                value: mysql.production.svc.cluster.local
               - name: database
-                value: redmine_production
+                value: redmine
               - name: username
                 value: root
               - name: MYSQL_PWD

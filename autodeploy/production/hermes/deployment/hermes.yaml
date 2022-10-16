@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: production
-  name: iredmail
+  name: hermes
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: iredmail
+      app: hermes
   template:
     metadata:
       namespace: production
       labels:
-        app: iredmail
+        app: hermes
     spec:
       containers:
       - name: iredmail

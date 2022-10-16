@@ -1,0 +1,156 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: apollo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apollo
+  template:
+    metadata:
+      namespace: production
+      labels:
+        app: apollo
+    spec:
+      containers:
+
+      - name: mysql
+        image: mysql:5.7-debian
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: My5QL_p@55
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "50m"
+          limits:
+            memory: "512Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        - name: mysql-config
+          mountPath: /etc/mysql/mysql.conf.d/mysqld.cnf
+          subPath: mysqld.cnf
+        - name: backup
+          mountPath: /backup
+
+      - name: redmine
+        image: asofainy/redmine:latest
+        imagePullPolicy: Always        
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+        env:
+        - name: RAILS_ENV
+          value: production
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/configuration.yml
+          subPath: configuration.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/database.yml
+          subPath: database.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/settings.yml
+          subPath: settings.yml
+        - name: redmine-config
+          mountPath: /usr/src/redmine/config/application.rb
+          subPath: application.rb
+        - name: redmine-config
+          mountPath: /config/env.yml
+          subPath: env.yml
+        - name: redmine-files
+          mountPath: /usr/src/redmine
+        - name: repo
+          mountPath: /repositories
+        - name: library
+          mountPath: /library
+        - name: mysql-data
+          mountPath: /mnt/var/lib/mysql
+        - name: mysql-config
+          mountPath: /mnt/etc/mysql
+
+
+      - name: calibre
+        image: debian:11.5
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: version
+            value: 6.6.1
+        command: ["/bin/bash","-c"]
+        args: 
+          - apt-get -qq update | sed -u "s/.*/` printf "calibre  |" ` &/" ;
+            apt-get -qq install -y wget python3 libegl1 libopengl0 xdg-utils libnss3 xz-utils | sed -u "s/.*/` printf "calibre  |" ` &/" ;
+            cd /tmp && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | bash /dev/stdin version=${version} install_dir=/opt | sed -u "s/.*/` printf "calibre  |" ` &/" ;
+            tail -f /dev/null
+        volumeMounts:
+        - name: calibre-data
+          mountPath: /opt
+
+
+      - name: calibre-web
+        image: debian:11.5
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: VERSION
+            value: 0.6.12
+          - name: FLASK_DEBUG
+            value: "1"
+          - name: CALIBRE_DBPATH
+            value: /opt/calibre-web
+        command: ["/bin/bash","-c"]
+        args: 
+          - apt-get update && apt-get install -y git | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
+            git clone -b build --progress http://oauth2:glpat-WwvNSL-hS-c1xPKrM4U4@gitlab-service.gitlab.svc.cluster.local/gitlab-instance-69044ebd/calibre-web.git /tmp/calibre-web | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
+            chmod -R +x /tmp/calibre-web/run/install.sh ;
+            /tmp/calibre-web/run/install.sh | sed "s/.*/` printf "calibre-web   |" ` &/"
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "50m"
+        ports:
+        - containerPort: 8083
+        volumeMounts:
+        - name: library
+          mountPath: /library
+        - name: calibre-data
+          mountPath: /opt
+
+
+      volumes:
+        - name: repo
+          persistentVolumeClaim:
+            claimName: repo-pvc
+        - name: library
+          persistentVolumeClaim:
+            claimName: library-pvc
+        - name: backup
+          persistentVolumeClaim:
+            claimName: backup-pvc
+        - name: redmine-config
+          configMap:
+            name: redmine-config
+        - name: redmine-files
+          persistentVolumeClaim:
+            claimName: redmine-files-pvc
+        - name: calibre-data
+          persistentVolumeClaim:
+            claimName: calibre-data-pvc
+        - name: calibre-web-data
+          persistentVolumeClaim:
+            claimName: calibre-web-data-pvc
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data-pvc
+        - name: mysql-config
+          configMap:
+            name: mysql-config
+

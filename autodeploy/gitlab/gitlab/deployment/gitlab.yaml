@@ -14,33 +14,80 @@ spec:
       labels:
         app: gitlab
     spec:
+#      serviceAccountName: gitlab-runner-admin
       containers:
+
       - name: gitlab
         image: gitlab/gitlab-ee
         resources:
           requests:
             memory: "5Gi"
-            cpu: "1000m"
+            cpu: "500m"
         ports:
         - containerPort: 80
-        - containerPort: 443
+#            tail -f /dev/null  
         volumeMounts:
         - name: gitlab-data
-          mountPath: /var/opt/gitlab
+          mountPath: /var/opt/gitlab    
+        - name: gitlab-config-persistent
+          mountPath: /etc/gitlab
         - name: gitlab-config
           mountPath: /etc/gitlab/gitlab.rb
           subPath: gitlab.rb
-        - name: gitlab-config-persistent
-          mountPath: /etc/gitlab
         - name: gitlab-backup
           mountPath: /backup
+
+      - name: gitlab-runner-docker
+        image: gitlab/gitlab-runner
+        securityContext:
+          privileged: true
+        command: ["/bin/sh","-c",]
+        args:
+          - token=$(grep registration_token /etc/gitlab/gitlab.rb | cut -d " " -f 4 | tr -d '"') ;
+            cmd=$(echo gitlab-runner -l debug register --non-interactive --url http://gitlab-service.gitlab.svc.cluster.local --registration-token $token --executor docker --docker-image alpine --name $HOSTNAME --docker-pull-policy always --locked=false --run-untagged=false --docker-privileged=true --limit 0 --tag-list runner-docker ); 
+            $cmd ;
+            while [ $? -ne 0 ]; do sleep 60; $cmd ; done ;
+            gitlab-runner -l debug register --non-interactive --url http://gitlab-service.gitlab.svc.cluster.local --registration-token $token --executor docker --docker-image alpine --name $HOSTNAME --docker-pull-policy always --locked=false --run-untagged=false --docker-privileged=true --limit 0 --tag-list runner-docker ; 
+            gitlab-runner verify ; 
+            gitlab-runner run
+        volumeMounts:
+        - name: socket
+          mountPath: /var/run/docker.sock
+
+        - name: gitlab-config
+          mountPath: /etc/gitlab/gitlab.rb
+          subPath: gitlab.rb
+
+      - name: gitlab-runner-shell-docker
+        image: docker
+        securityContext:
+          privileged: true
+        command: ["/bin/sh","-c"]
+        args:
+          - apk add bash git gitlab-runner ; 
+            token=$(grep registration_token /etc/gitlab/gitlab.rb | cut -d " " -f 4 | tr -d '"') ;
+            cmd=$(echo gitlab-runner -l debug register --non-interactive --url http://gitlab-service.gitlab.svc.cluster.local --registration-token $token --executor shell --name $HOSTNAME --tag-list runner-shell-docker ) ;
+            $cmd ;
+            while [ $? -ne 0 ]; do sleep 60; $cmd ; done ;
+            gitlab-runner verify ; 
+            gitlab-runner run
+        volumeMounts:
+        - name: socket
+          mountPath: /var/run/docker.sock
+
+        - name: gitlab-config
+          mountPath: /etc/gitlab/gitlab.rb
+          subPath: gitlab.rb
+      
       volumes:
         - name: gitlab-config
           configMap:
             name: gitlab-config
+
         - name: gitlab-data
           persistentVolumeClaim:
             claimName: gitlab-data-pvc
+
         - name: gitlab-config-persistent
           persistentVolumeClaim:
             claimName: gitlab-config-pvc
@@ -48,3 +95,9 @@ spec:
         - name: gitlab-backup
           persistentVolumeClaim:
             claimName: gitlab-backup-pvc
+
+        - name: socket
+          hostPath:
+            path: /var/run/docker.sock
+
+
