@@ -15,7 +15,6 @@ spec:
         app: apollo
     spec:
       containers:
-
       - name: mysql
         image: mysql:5.7-debian
         ports:
@@ -23,13 +22,7 @@ spec:
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: My5QL_p@55
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "50m"
-          limits:
-            memory: "512Mi"
-            cpu: "100m"
+
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
@@ -38,14 +31,19 @@ spec:
           subPath: mysqld.cnf
         - name: backup
           mountPath: /backup
+        
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "50m"
+          limits:
+            memory: "2Gi"
+            cpu: "100m"
 
       - name: redmine
         image: asofainy/redmine:latest
         imagePullPolicy: Always        
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "500m"
+
         env:
         - name: RAILS_ENV
           value: production
@@ -77,7 +75,14 @@ spec:
           mountPath: /mnt/var/lib/mysql
         - name: mysql-config
           mountPath: /mnt/etc/mysql
-
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "700Mi"
+            cpu: "300m"
 
       - name: calibre
         image: debian:11.5
@@ -88,12 +93,21 @@ spec:
         command: ["/bin/bash","-c"]
         args: 
           - apt-get -qq update | sed -u "s/.*/` printf "calibre  |" ` &/" ;
+            file="$root/plugins/redmine_xapian/app/views/search/index.html.erb" ;
             apt-get -qq install -y wget python3 libegl1 libopengl0 xdg-utils libnss3 xz-utils | sed -u "s/.*/` printf "calibre  |" ` &/" ;
             cd /tmp && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | bash /dev/stdin version=${version} install_dir=/opt | sed -u "s/.*/` printf "calibre  |" ` &/" ;
             tail -f /dev/null
         volumeMounts:
         - name: calibre-data
           mountPath: /opt
+
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "50m"
 
 
       - name: calibre-web
@@ -110,12 +124,9 @@ spec:
         args: 
           - apt-get update && apt-get install -y git | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
             git clone -b build --progress http://oauth2:glpat-WwvNSL-hS-c1xPKrM4U4@gitlab-service.gitlab.svc.cluster.local/gitlab-instance-69044ebd/calibre-web.git /tmp/calibre-web | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
-            chmod -R +x /tmp/calibre-web/run/install.sh ;
-            /tmp/calibre-web/run/install.sh | sed "s/.*/` printf "calibre-web   |" ` &/"
-        resources:
-          requests:
-            memory: "500Mi"
-            cpu: "50m"
+            chmod -R +x /tmp/calibre-web/run/install.sh ;         
+            /tmp/calibre-web/run/install.sh | sed "s/.*/` printf "calibre-web   |" ` &/" 
+
         ports:
         - containerPort: 8083
         volumeMounts:
@@ -124,6 +135,13 @@ spec:
         - name: calibre-data
           mountPath: /opt
 
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "100m"
+          limits:
+            memory: "700Mi"
+            cpu: "150m"
 
       volumes:
         - name: repo
