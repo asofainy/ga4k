@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: production
   name: apollo
 spec:
   replicas: 1
@@ -10,7 +9,6 @@ spec:
       app: apollo
   template:
     metadata:
-      namespace: production
       labels:
         app: apollo
     spec:
@@ -41,7 +39,7 @@ spec:
             cpu: "100m"
 
       - name: redmine
-        image: asofainy/redmine:latest
+        image: asofainy/redmine:v1.1.0
         imagePullPolicy: Always        
 
         env:
@@ -66,8 +64,8 @@ spec:
           mountPath: /config/env.yml
           subPath: env.yml
         - name: redmine-files
-          mountPath: /usr/src/redmine
-        - name: repo
+          mountPath: /files
+        - name: redmine-repo
           mountPath: /repositories
         - name: library
           mountPath: /library
@@ -75,7 +73,7 @@ spec:
           mountPath: /mnt/var/lib/mysql
         - name: mysql-config
           mountPath: /mnt/etc/mysql
-        
+
         resources:
           requests:
             memory: "512Mi"
@@ -144,9 +142,9 @@ spec:
             cpu: "150m"
 
       volumes:
-        - name: repo
+        - name: redmine-repo
           persistentVolumeClaim:
-            claimName: repo-pvc
+            claimName: redmine-repo-pvc
         - name: library
           persistentVolumeClaim:
             claimName: library-pvc

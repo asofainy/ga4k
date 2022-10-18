@@ -1,27 +1,30 @@
+# Source: gitlab-runner/templates/service-account.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: redmine-sa
+  name: gitlab-sa
   namespace: production
 ---
+# Source: gitlab-runner/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: "ClusterRole"
 metadata:
-  name: redmine-sa
+  name: gitlab-sa
 rules:
 - apiGroups: ["*"]
   resources: ["*"]
   verbs: ["*"]
 ---
+# Source: gitlab-runner/templates/role-binding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: "ClusterRoleBinding"
 metadata:
-  name: redmine-sa
+  name: gitlab-sa
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: "ClusterRole"
-  name: redmine-sa
+  name: gitlab-sa
 subjects:
 - kind: ServiceAccount
-  name: redmine-sa
+  name: gitlab-sa
   namespace: production

@@ -629,7 +629,7 @@
 ###!   path that doesn't contain symlinks.**
 # git_data_dirs({
 #   "default" => {
-#     "path" => "/mnt/nfs-01/git-data"
+#     "path" => "/repositories/git-data"
 #    }
 # })
 

@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: gitlab
   name: gitlab
 spec:
   replicas: 1
@@ -10,7 +9,6 @@ spec:
       app: gitlab
   template:
     metadata:
-      namespace: gitlab
       labels:
         app: gitlab
     spec:
@@ -19,14 +17,11 @@ spec:
 
       - name: gitlab
         image: gitlab/gitlab-ee
-        resources:
-          requests:
-            memory: "5Gi"
-            cpu: "500m"
         ports:
         - containerPort: 80
 #            tail -f /dev/null  
         volumeMounts:
+
         - name: gitlab-data
           mountPath: /var/opt/gitlab    
         - name: gitlab-config-persistent
@@ -36,6 +31,14 @@ spec:
           subPath: gitlab.rb
         - name: gitlab-backup
           mountPath: /backup
+          
+        resources:
+          requests:
+            memory: "5Gi"
+            cpu: "500m"
+          limits:
+            memory: "6Gi"
+            cpu: "750m"
 
       - name: gitlab-runner-docker
         image: gitlab/gitlab-runner
@@ -58,6 +61,14 @@ spec:
           mountPath: /etc/gitlab/gitlab.rb
           subPath: gitlab.rb
 
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "75m"
+
       - name: gitlab-runner-shell-docker
         image: docker
         securityContext:
@@ -78,6 +89,14 @@ spec:
         - name: gitlab-config
           mountPath: /etc/gitlab/gitlab.rb
           subPath: gitlab.rb
+        
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "75m"
       
       volumes:
         - name: gitlab-config

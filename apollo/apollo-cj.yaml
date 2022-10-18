@@ -1,8 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  namespace: production
-  name: backup
+  name: apollo-backup
 spec:
   schedule: "0 0 * * *"
   jobTemplate:
@@ -11,7 +10,7 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: backup
+          - name: backup-mysql
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             env:
@@ -36,8 +35,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  namespace: production
-  name: index
+  name: apollo-index
 spec:
   schedule: "*/20 * * * *"
   jobTemplate:
@@ -46,7 +44,7 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: redmine-index
+          - name: index-redmine
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             command:
@@ -58,30 +56,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  namespace: production
-  name: sync-library
-spec:
-  schedule: "*/10 * * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          serviceAccountName: redmine-sa
-          containers:
-          - name: sync-library
-            image: bitnami/kubectl:latest
-            imagePullPolicy: IfNotPresent
-            command:
-            - /bin/bash
-            - -c
-            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /opt/buildbox/scripts/sync-library.sh
-          restartPolicy: OnFailure
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  namespace: production
-  name: sync-repo
+  name: apollo-sync
 spec:
   schedule: "*/15 * * * *"
   jobTemplate:
@@ -97,4 +72,13 @@ spec:
             - /bin/bash
             - -c
             - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /opt/buildbox/scripts/sync-repo.sh
+          
+          - name: sync-library
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/bash
+            - -c
+            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /opt/buildbox/scripts/sync-library.sh
+          
           restartPolicy: OnFailure
