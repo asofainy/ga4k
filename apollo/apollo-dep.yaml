@@ -32,10 +32,10 @@ spec:
         
         resources:
           requests:
-            memory: "1Gi"
+            memory: "256Mi"
             cpu: "50m"
           limits:
-            memory: "2Gi"
+            memory: "512Mi"
             cpu: "100m"
 
       - name: redmine
@@ -47,6 +47,9 @@ spec:
           value: production
         ports:
         - containerPort: 3000
+
+        securityContext:
+          privileged: true 
         volumeMounts:
         - name: redmine-config
           mountPath: /usr/src/redmine/config/configuration.yml
@@ -63,8 +66,12 @@ spec:
         - name: redmine-config
           mountPath: /config/env.yml
           subPath: env.yml
+        - name: redmine-config
+          mountPath: /etc/ImageMagick-6/policy.xml
+          subPath: policy.xml
+# A Verifier si le pod ne demarre pas
         - name: redmine-files
-          mountPath: /files
+          mountPath: /usr/src/redmine/files
         - name: redmine-repo
           mountPath: /repositories
         - name: library
@@ -77,53 +84,33 @@ spec:
         resources:
           requests:
             memory: "512Mi"
-            cpu: "250m"
+            cpu: "100m"
           limits:
             memory: "700Mi"
-            cpu: "300m"
-
-      - name: calibre
-        image: debian:11.5
-        imagePullPolicy: IfNotPresent
-        env:
-          - name: version
-            value: 6.6.1
-        command: ["/bin/bash","-c"]
-        args: 
-          - apt-get -qq update | sed -u "s/.*/` printf "calibre  |" ` &/" ;
-            file="$root/plugins/redmine_xapian/app/views/search/index.html.erb" ;
-            apt-get -qq install -y wget python3 libegl1 libopengl0 xdg-utils libnss3 xz-utils | sed -u "s/.*/` printf "calibre  |" ` &/" ;
-            cd /tmp && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | bash /dev/stdin version=${version} install_dir=/opt | sed -u "s/.*/` printf "calibre  |" ` &/" ;
-            tail -f /dev/null
-        volumeMounts:
-        - name: calibre-data
-          mountPath: /opt
-
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "50m"
-          limits:
-            memory: "128Mi"
-            cpu: "50m"
-
+            cpu: "250m"
 
       - name: calibre-web
         image: debian:11.5
         imagePullPolicy: IfNotPresent
         env:
-          - name: VERSION
+          - name: CALIBRE_VERSION
+            value: 6.7.1
+          - name: CALIBRE_WEB_VERSION
             value: 0.6.12
           - name: FLASK_DEBUG
             value: "1"
           - name: CALIBRE_DBPATH
             value: /opt/calibre-web
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: apollo-secrets
+                key: github-token
         command: ["/bin/bash","-c"]
         args: 
-          - apt-get update && apt-get install -y git | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
-            git clone -b build --progress http://oauth2:glpat-WwvNSL-hS-c1xPKrM4U4@gitlab-service.gitlab.svc.cluster.local/gitlab-instance-69044ebd/calibre-web.git /tmp/calibre-web | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
-            chmod -R +x /tmp/calibre-web/run/install.sh ;         
-            /tmp/calibre-web/run/install.sh | sed "s/.*/` printf "calibre-web   |" ` &/" 
+          - apt-get -qqq update && apt-get -qqq  install -y git | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
+            git clone -b build --progress https://${GITHUB_TOKEN}@github.com/asofainy/calibre-web.git /tmp/calibre-web | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
+            chmod -R +x /tmp/calibre-web/run/install.sh && /tmp/calibre-web/run/install.sh | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;         
 
         ports:
         - containerPort: 8083
@@ -135,11 +122,11 @@ spec:
 
         resources:
           requests:
+            memory: "256Mi"
+            cpu: "50m"
+          limits:
             memory: "512Mi"
             cpu: "100m"
-          limits:
-            memory: "700Mi"
-            cpu: "150m"
 
       volumes:
         - name: redmine-repo

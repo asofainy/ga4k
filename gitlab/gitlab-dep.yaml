@@ -35,10 +35,10 @@ spec:
         resources:
           requests:
             memory: "5Gi"
-            cpu: "500m"
+            cpu: "250m"
           limits:
-            memory: "6Gi"
-            cpu: "750m"
+            memory: "7Gi"
+            cpu: "500m"
 
       - name: gitlab-runner-docker
         image: gitlab/gitlab-runner
@@ -47,10 +47,9 @@ spec:
         command: ["/bin/sh","-c",]
         args:
           - token=$(grep registration_token /etc/gitlab/gitlab.rb | cut -d " " -f 4 | tr -d '"') ;
-            cmd=$(echo gitlab-runner -l debug register --non-interactive --url http://gitlab-service.gitlab.svc.cluster.local --registration-token $token --executor docker --docker-image alpine --name $HOSTNAME --docker-pull-policy always --locked=false --run-untagged=false --docker-privileged=true --limit 0 --tag-list runner-docker ); 
+            cmd=$(echo gitlab-runner -l debug register --non-interactive --url http://gitlab-service.production.svc.cluster.local --registration-token $token --executor docker --docker-image alpine --name $HOSTNAME --docker-pull-policy always --locked=false --run-untagged=false --docker-privileged=true --limit 0 --tag-list runner-docker ); 
             $cmd ;
             while [ $? -ne 0 ]; do sleep 60; $cmd ; done ;
-            gitlab-runner -l debug register --non-interactive --url http://gitlab-service.gitlab.svc.cluster.local --registration-token $token --executor docker --docker-image alpine --name $HOSTNAME --docker-pull-policy always --locked=false --run-untagged=false --docker-privileged=true --limit 0 --tag-list runner-docker ; 
             gitlab-runner verify ; 
             gitlab-runner run
         volumeMounts:
@@ -63,11 +62,11 @@ spec:
 
         resources:
           requests:
-            memory: "100Mi"
+            memory: "256Mi"
             cpu: "50m"
           limits:
-            memory: "256Mi"
-            cpu: "75m"
+            memory: "512Mi"
+            cpu: "100m"
 
       - name: gitlab-runner-shell-docker
         image: docker
@@ -92,11 +91,11 @@ spec:
         
         resources:
           requests:
-            memory: "100Mi"
+            memory: "256Mi"
             cpu: "50m"
           limits:
-            memory: "256Mi"
-            cpu: "75m"
+            memory: "512Mi"
+            cpu: "100m"
       
       volumes:
         - name: gitlab-config
