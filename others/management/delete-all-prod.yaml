@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  namespace: default
+  namespace: production
   name: delete-all-production 
 spec:
   schedule: "0 4 * * *"
@@ -16,7 +16,7 @@ spec:
             command: ["/bin/bash", "-c"]
             args:
               - kubectl delete --all deployments --namespace=production
-              - kubectl delete --all cj --namespace=production
+    #          - kubectl delete --all cj --namespace=production
     #          - kubectl delete --all namespaces
     #           for each in $(kubectl get ns -o jsonpath="{.items[*].metadata.name}" | grep -v kube-system);
     #           do
