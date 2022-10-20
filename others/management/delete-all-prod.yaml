@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  namespace: production
+  namespace: default
   name: delete-all-production 
 spec:
   schedule: "0 4 * * *"
