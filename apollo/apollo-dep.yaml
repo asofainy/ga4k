@@ -39,7 +39,7 @@ spec:
             cpu: "100m"
 
       - name: redmine
-        image: asofainy/redmine:ci
+        image: asofainy/redmine:v1.1.0
         imagePullPolicy: Always        
 
         env:
@@ -72,6 +72,10 @@ spec:
 # A Verifier si le pod ne demarre pas
         - name: redmine-files
           mountPath: /usr/src/redmine/files
+          subPath: files
+        - name: redmine-files
+          mountPath: /usr/src/redmine/file_index
+          subPath: file_index
         - name: redmine-repo
           mountPath: /repositories
         - name: library
