@@ -15,6 +15,7 @@ spec:
       containers:
       - name: mysql
         image: mysql:5.7-debian
+        
         ports:
         - containerPort: 3306
         env:
@@ -28,13 +29,21 @@ spec:
             secretKeyRef:
               name: apollo-secrets
               key: mysql-password
+
               
         volumeMounts:
-        - name: mysql-data
+#        - name: mysql-data
+#          mountPath: /var/lib/mysql
+
+        - name: mysql-restore
           mountPath: /var/lib/mysql
+ #         mountPath: /mnt/mysql-restore
+          subPath: mysql
+          
         - name: mysql-config
           mountPath: /etc/mysql/mysql.cnf
           subPath: mysql.cnf
+
 
       - name: redmine
         image: asofainy/redmine:v1.1.0
@@ -43,8 +52,6 @@ spec:
         env:
         - name: RAILS_ENV
           value: production
-        - name: REDMINE_PLUGINS_MIGRATE
-          value: "true"
         ports:
         - containerPort: 3000
 
@@ -84,6 +91,8 @@ spec:
           mountPath: /mnt/var/lib/mysql
         - name: mysql-config
           mountPath: /mnt/etc/mysql
+        - name: mysql-restore
+          mountPath: /mnt/mysql-restore
 
       - name: calibre-web
         image: debian:11.5
@@ -141,4 +150,8 @@ spec:
         - name: mysql-config
           configMap:
             name: mysql-config
+            
+        - name: mysql-restore
+          persistentVolumeClaim:
+            claimName: mysql-restore-pvc     
 
