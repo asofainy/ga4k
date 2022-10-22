@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: apollo-backup
 spec:
-  schedule: "0 */6 * * *"
+  schedule: "0 */2 * * *"
   jobTemplate:
     spec:
       template:
@@ -17,19 +17,31 @@ spec:
               - name: app
                 value: redmine
               - name: host
-                value: mysql.production.svc.cluster.local
+                value: apollo-services.production.svc.cluster.local
               - name: database
                 value: redmine
               - name: username
                 value: root
-              - name: MYSQL_PWD
-                value: My5QL_p@55
-              - name: file
-                value: dump_`date +'%Y%m%d_%H%M%S'`.sql.gz
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: backup_local
+                value: /tmp/backup
+              - name: backup_remote
+                value: google_drive:Backups/MySQL
             command:
             - /bin/bash
             - -c
-            - pod=$(kubectl get pods -n default -l app=mysql --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace default -c mysql -- /bin/bash -c "mkdir -p /backup/$app ; MYSQL_PWD=$MYSQL_PWD mysqldump -h $host -u  $username --routines --triggers $database | gzip -c > /backup/$app/$file ; echo Dump created $file ; ls -ltrah /backup/$app"
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production apollo mysql "
+              apt-get update && apt-get install git -y ;
+              rm -rf /tmp/toolbox ;
+              git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/mysql/backup.sh $host $username $database $backup_local ;
+              /tmp/toolbox/rclone/setup.sh ;
+              /tmp/toolbox/rclone/copy.sh $backup_local $backup_remote"
           restartPolicy: OnFailure
 ---
 apiVersion: batch/v1

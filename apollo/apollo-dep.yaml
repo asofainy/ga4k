@@ -19,24 +19,22 @@ spec:
         - containerPort: 3306
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: My5QL_p@55
-
+          valueFrom:
+            secretKeyRef:
+              name: apollo-secrets
+              key: mysql-root-password
+        - name: MYSQL_PWD
+          valueFrom:
+            secretKeyRef:
+              name: apollo-secrets
+              key: mysql-password
+              
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
         - name: mysql-config
-          mountPath: /etc/mysql/mysql.conf.d/mysqld.cnf
-          subPath: mysqld.cnf
-        - name: backup
-          mountPath: /backup
-        
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "50m"
-          limits:
-            memory: "512Mi"
-            cpu: "100m"
+          mountPath: /etc/mysql/mysql.cnf
+          subPath: mysql.cnf
 
       - name: redmine
         image: asofainy/redmine:v1.1.0
@@ -45,6 +43,8 @@ spec:
         env:
         - name: RAILS_ENV
           value: production
+        - name: REDMINE_PLUGINS_MIGRATE
+          value: "true"
         ports:
         - containerPort: 3000
 
@@ -85,14 +85,6 @@ spec:
         - name: mysql-config
           mountPath: /mnt/etc/mysql
 
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "100m"
-          limits:
-            memory: "700Mi"
-            cpu: "250m"
-
       - name: calibre-web
         image: debian:11.5
         imagePullPolicy: IfNotPresent
@@ -124,14 +116,6 @@ spec:
         - name: calibre-data
           mountPath: /opt
 
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "50m"
-          limits:
-            memory: "512Mi"
-            cpu: "100m"
-
       volumes:
         - name: redmine-repo
           persistentVolumeClaim:
@@ -139,9 +123,6 @@ spec:
         - name: library
           persistentVolumeClaim:
             claimName: library-pvc
-        - name: backup
-          persistentVolumeClaim:
-            claimName: backup-pvc
         - name: redmine-config
           configMap:
             name: redmine-config

@@ -4,7 +4,7 @@ metadata:
   name: apollo-loadbalancer
 spec:
   type: LoadBalancer
-  loadBalancerIP: 34.175.159.251
+  loadBalancerIP: 34.170.165.32
   selector:
     app: apollo
   ports:
