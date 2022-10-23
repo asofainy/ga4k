@@ -13,11 +13,13 @@ spec:
         app: apollo
     spec:
       containers:
+      
       - name: mysql
         image: mysql:5.7-debian
         
         ports:
         - containerPort: 3306
+
         env:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
@@ -30,14 +32,14 @@ spec:
               name: apollo-secrets
               key: mysql-password
 
+        args:
+            - /bin/bash
+            - -c
+            - apt-get update && apt-get install git -y
               
         volumeMounts:
-#        - name: mysql-data
-#          mountPath: /var/lib/mysql
-
         - name: mysql-restore
           mountPath: /var/lib/mysql
- #         mountPath: /mnt/mysql-restore
           subPath: mysql
           
         - name: mysql-config
@@ -52,11 +54,13 @@ spec:
         env:
         - name: RAILS_ENV
           value: production
+
         ports:
         - containerPort: 3000
 
         securityContext:
           privileged: true 
+
         volumeMounts:
         - name: redmine-config
           mountPath: /usr/src/redmine/config/configuration.yml
@@ -87,12 +91,10 @@ spec:
           mountPath: /repositories
         - name: library
           mountPath: /library
-        - name: mysql-data
-          mountPath: /mnt/var/lib/mysql
         - name: mysql-config
           mountPath: /mnt/etc/mysql
         - name: mysql-restore
-          mountPath: /mnt/mysql-restore
+          mountPath: /mnt/var/lib/mysql
 
       - name: calibre-web
         image: debian:11.5
@@ -111,6 +113,7 @@ spec:
               secretKeyRef:
                 name: apollo-secrets
                 key: github-token
+
         command: ["/bin/bash","-c"]
         args: 
           - apt-get -qqq update && apt-get -qqq  install -y git | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
@@ -144,14 +147,10 @@ spec:
         - name: calibre-web-data
           persistentVolumeClaim:
             claimName: calibre-web-data-pvc
-        - name: mysql-data
-          persistentVolumeClaim:
-            claimName: mysql-data-pvc
-        - name: mysql-config
-          configMap:
-            name: mysql-config
-            
         - name: mysql-restore
           persistentVolumeClaim:
             claimName: mysql-restore-pvc     
+        - name: mysql-config
+          configMap:
+            name: mysql-config
 

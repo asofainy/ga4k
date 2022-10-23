@@ -27,23 +27,22 @@ spec:
                   secretKeyRef:
                     name: apollo-secrets
                     key: github-token
-              - name: backup_local
+              - name: local
                 value: /tmp/backup
-              - name: backup_remote
+              - name: remote
                 value: google_drive:Backups/MySQL
             command:
             - /bin/bash
             - -c
             - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
               /tmp/toolbox/kubectl/run.sh production apollo mysql "
-              apt-get update && apt-get install git -y ;
-              rm -rf /tmp/toolbox ;
-              git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
-              /tmp/toolbox/mysql/backup.sh $host $username $database $backup_local ;
-              /tmp/toolbox/rclone/setup.sh ;
-              /tmp/toolbox/rclone/copy.sh $backup_local $backup_remote"
+              rm -rf /tmp/toolbox ; git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/mysql/backup.sh $host $username $database $local ;
+              /tmp/toolbox/rclone/setup.sh ; /tmp/toolbox/rclone/copy.sh $local $remote"
           restartPolicy: OnFailure
+          
 ---
+
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -56,24 +55,55 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
+
           - name: sync-repo
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: repos
+                value: "redmine,calibre-web,ga4k,toolbox"
+
             command:
             - /bin/bash
             - -c
-            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /opt/buildbox/scripts/sync-repo.sh
-          
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production apollo redmine "  
+              /opt/buildbox/scripts/sync-repo.sh"    
+
           - name: sync-library
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: local
+                value: /library
+              - name: remote
+                value: google_drive:Bibliotheques
+
             command:
             - /bin/bash
             - -c
-            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /opt/buildbox/scripts/sync-library.sh
-          
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production apollo redmine "
+              rm -rf /tmp/toolbox ; git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/rclone/setup.sh ; /tmp/toolbox/rclone/copy.sh $remote $local ;
+              chown -R redmine:redmine $local/Ebooks ;
+              chown -R 1000:1000 $local/Calibre"  
           restartPolicy: OnFailure
+
 ---
+
 apiVersion: batch/v1
 kind: CronJob
 metadata:
