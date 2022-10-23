@@ -5,9 +5,9 @@ replicas: 2
 
 rbac:
   create: false
-  serviceAccountName: gitlab-runner-admin
+  serviceAccountName: gitlab-sa
 
-gitlabUrl: http://gitlab-service.gitlab.svc.cluster.local
+gitlabUrl: http://gitlab-service.production.svc.cluster.local
 runnerRegistrationToken: kEtSzsjQKqS4n4kS3GWT
 
 runners:
@@ -15,7 +15,7 @@ runners:
     [[runners]]
       [runners.kubernetes]
         image = "ubuntu:16.04"
-        service_account = "gitlab-runner-admin"
+        service_account = "gitlab-sa"
         allowed_pull_policies = ["always", "if-not-present"]
 
   tags: "runner-kubernetes"
