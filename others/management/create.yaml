@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  namespace: production
+  name: create
+spec:
+  schedule: 0 0 * * *  
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: redmine-sa
+          containers:
+          - name: create
+            image: bitnami/kubectl:latest
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+
+            command:
+              - /bin/bash
+              - -c
+              - git clone --progress https://${GITHUB_TOKEN}@github.com/asofainy/ga4k.git /tmp/ga4k && chmod -R +x /tmp/ga4k ;
+                namespace=production ;
+                kubectl -n $namespace create -f /tmp/ga4k/apollo/apollo-dep.yaml ; 
+                kubectl -n $namespace create -f /tmp/ga4k/apollo/apollo-cj.yaml ; 
+                rm -rf /tmp/toolbox ;
+
+          restartPolicy: OnFailure
