@@ -12,14 +12,12 @@ spec:
       labels:
         app: gitlab
     spec:
-#      serviceAccountName: gitlab-runner-admin
       containers:
 
       - name: gitlab
-        image: gitlab/gitlab-ee
+        image: gitlab/gitlab-ee:15.4.2-ee.0
         ports:
         - containerPort: 80
-#            tail -f /dev/null  
         volumeMounts:
         - name: gitlab-data
           mountPath: /var/opt/gitlab    
@@ -29,16 +27,8 @@ spec:
           mountPath: /etc/gitlab/gitlab.rb
           subPath: gitlab.rb
         - name: gitlab-backup
-          mountPath: /backup
+          mountPath: /backups
           
-        resources:
-          requests:
-            memory: "5Gi"
-            cpu: "250m"
-          limits:
-            memory: "7Gi"
-            cpu: "500m"
-
       volumes:
         - name: gitlab-config
           configMap:

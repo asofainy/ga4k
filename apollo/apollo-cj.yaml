@@ -10,7 +10,7 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: backup-mysql
+          - name: backup-db
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             env:
@@ -27,18 +27,21 @@ spec:
                   secretKeyRef:
                     name: apollo-secrets
                     key: github-token
-              - name: local
-                value: /tmp/backup
-              - name: remote
-                value: google_drive:Backups/MySQL
+              - name: backup_folder
+                value: /backups
+
             command:
             - /bin/bash
             - -c
-            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ; 
+              chmod -R +x /tmp/toolbox ;
               /tmp/toolbox/kubectl/run.sh production apollo mysql "
-              rm -rf /tmp/toolbox ; git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
-              /tmp/toolbox/mysql/backup.sh $host $username $database $local ;
-              /tmp/toolbox/rclone/setup.sh ; /tmp/toolbox/rclone/copy.sh $local $remote"
+              rm -rf /tmp/toolbox ; 
+              apt-get update && apt-get install git -y;
+              git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ;
+              chmod -R +x /tmp/toolbox ;       
+              /tmp/toolbox/mysql/backup.sh $host $username $database $backup_folder"
+                                 
           restartPolicy: OnFailure
           
 ---
@@ -66,15 +69,27 @@ spec:
                   secretKeyRef:
                     name: apollo-secrets
                     key: github-token
-              - name: repos
-                value: "redmine,calibre-web,ga4k,toolbox"
+              - name: REPOS
+                value: "redmine calibre-web ga4k toolbox"
 
             command:
             - /bin/bash
             - -c
             - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
               /tmp/toolbox/kubectl/run.sh production apollo redmine "  
-              /opt/buildbox/scripts/sync-repo.sh"    
+              rm -rf /repositories/* ;   
+              declare -a repos=($REPOS);
+              echo repos is \$repos ;
+              for repo in \${repos[@]} ;
+              do
+                  declare rc=0 ;
+                  echo cloning repo \$repo ;
+                  git clone --bare --progress https://${GITHUB_TOKEN}@github.com/asofainy/\$repo /repositories/\$repo/.git ;
+                  rc=\$? ;
+                  echo End Syncing repo \$repo | rc=$rc ;
+              done ;
+              chown -R redmine:redmine /repositories ;
+              exit \$rc" 
 
           - name: sync-library
             image: bitnami/kubectl:latest
@@ -100,6 +115,32 @@ spec:
               /tmp/toolbox/rclone/setup.sh ; /tmp/toolbox/rclone/copy.sh $remote $local ;
               chown -R redmine:redmine $local/Ebooks ;
               chown -R 1000:1000 $local/Calibre"  
+
+
+          - name: sync-backup
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: local
+                value: /backups
+              - name: remote
+                value: google_drive:Applications/Apollo
+            command:
+            - /bin/bash
+            - -c
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox && chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production apollo redmine "
+              rm -rf /tmp/toolbox ;
+              git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ;
+              chmod -R +x /tmp/toolbox ;       
+              /tmp/toolbox/rclone/setup.sh ; 
+              /tmp/toolbox/rclone/copy.sh $local $remote"
+              
           restartPolicy: OnFailure
 
 ---
@@ -119,8 +160,27 @@ spec:
           - name: index-redmine
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+
             command:
             - /bin/bash
             - -c
-            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo $pod ; kubectl exec $pod --namespace production -c redmine -- /opt/buildbox/scripts/index.sh $RAILS_ENV production
+            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; 
+              kubectl exec $pod --namespace production -c redmine -- /bin/bash -l -c "
+              echo used environment \$RAILS_ENV ;
+              cd /usr/src/redmine/plugins/redmine_xapian/extra ;
+              sed -i \"s/env = '.*'/env = '\$RAILS_ENV'/g\" xapian_indexer.rb ;
+              bundle install ;
+              ruby xapian_indexer.rb -v ;
+              chown -R redmine:redmine /usr/src/redmine/file_index"
+              
           restartPolicy: OnFailure
+          
+         
+         

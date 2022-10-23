@@ -3,18 +3,84 @@ kind: CronJob
 metadata:
   name: gitlab-backup
 spec:
-  schedule: "0 */6 * * *"
+  schedule: "0 */2 * * *"
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: gitlab-runner-admin
+          serviceAccountName: gitlab-sa
           containers:
           - name: gitlab-backup
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: backup_folder
+                value: /backups
             command:
             - /bin/bash
             - -c
-            - pod=$(kubectl get pods -n gitlab -l app=gitlab --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; echo "===== Start of job =====" ; kubectl exec $pod --namespace gitlab -c gitlab -- /backup/backup.sh ; echo "===== End of job =====" 
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ;
+              chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production gitlab gitlab "
+              date=`date +'%Y%m%d_%H%M%S'` ;
+              version=\$( cat /RELEASE | grep RELEASE_VERSION | cut -d '=' -f 2 ) ;
+              echo version is \$version ;
+              mkdir -pv /tmp/\$date/etc ;    
+              gitlab-backup create STRATEGY=copy ;        
+              cp -rv /var/opt/gitlab/backups/* /tmp/\$date ;
+              cp -rv /etc/gitlab /tmp/\$date/etc ; 
+              tar cvf $backup_folder/gitlab_\${date}-\${version}.tar /tmp/\$date ;
+              rm -rfv  /tmp/\$date ;
+              rm -rfv /var/opt/gitlab/backups/*"
+      
+          restartPolicy: OnFailure   
+
+---
+
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gitlab-sync
+spec:
+  schedule: "15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: gitlab-sa
+          containers:
+
+          - name: sync-backup
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: local
+                value: /backups      
+              - name: remote
+                value: google_drive:Applications/Gitlab
+
+            command:
+            - /bin/bash
+            - -c
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ;
+              chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production gitlab gitlab "
+              rm -rf /tmp/toolbox ;
+              git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ;
+              chmod -R +x /tmp/toolbox ;       
+              /tmp/toolbox/rclone/setup.sh ; 
+              /tmp/toolbox/rclone/copy.sh $local $remote"
+
           restartPolicy: OnFailure
