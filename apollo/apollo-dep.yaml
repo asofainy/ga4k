@@ -97,28 +97,8 @@ spec:
           mountPath: /backups
 
       - name: calibre-web
-        image: debian:11.5
-        imagePullPolicy: IfNotPresent
-        env:
-          - name: CALIBRE_VERSION
-            value: 6.7.1
-          - name: CALIBRE_WEB_VERSION
-            value: 0.6.12
-          - name: FLASK_DEBUG
-            value: "1"
-          - name: CALIBRE_DBPATH
-            value: /opt/calibre-web
-          - name: GITHUB_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: apollo-secrets
-                key: github-token
-
-        command: ["/bin/bash","-c"]
-        args: 
-          - apt-get -qqq update && apt-get -qqq  install -y git | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
-            git clone -b build --progress https://${GITHUB_TOKEN}@github.com/asofainy/calibre-web.git /tmp/calibre-web | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
-            chmod -R +x /tmp/calibre-web/run/install.sh && /tmp/calibre-web/run/install.sh | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;         
+        image: asofainy/calibre-web:ci
+        imagePullPolicy: Always
 
         ports:
         - containerPort: 8083
