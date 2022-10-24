@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   namespace: production
-  name: create_applications
+  name: create-applications
 spec:
   schedule: 0 0 * * *  
   jobTemplate:
@@ -11,7 +11,7 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: create_applications
+          - name: create-applications
             image: bitnami/kubectl:latest
             env:
               - name: GITHUB_TOKEN
