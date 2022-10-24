@@ -9,7 +9,12 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
+
+
 ---
+
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -21,31 +26,11 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
+
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata: 
-  name: calibre-data-pvc
-spec:
-  storageClassName: custom
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata: 
-  name: calibre-web-data-pvc
-spec:
-  storageClassName: custom
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 512Ki
----
+
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -57,7 +42,11 @@ spec:
   resources:
     requests:
       storage: 5Gi
+
+      
 ---
+
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -69,11 +58,30 @@ spec:
   resources:
     requests:
       storage: 2Gi
+
 ---
+
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: backups-pvc
+  name: calibre-web-data-pvc
+spec:
+  storageClassName: custom
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+
+---
+
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: apollo-backups-pvc
 spec:
   storageClassName: custom
   accessModes:
