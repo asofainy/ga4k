@@ -46,7 +46,7 @@ spec:
 
 
       - name: redmine
-        image: asofainy/redmine:ci
+        image: asofainy/redmine:v1.1.0
         imagePullPolicy: Always        
 
         env:
