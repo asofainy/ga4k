@@ -13,6 +13,12 @@ spec:
           - name: backup-redmine-db
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            resources:
+              limits:
+                  memory: "128Mi"
+                  cpu: "25m"
+            
             env:
               - name: app
                 value: redmine
@@ -88,6 +94,11 @@ spec:
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
 
+            resources:
+              limits:
+                  memory: "128Mi"
+                  cpu: "25m"
+
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
@@ -120,6 +131,11 @@ spec:
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
 
+            resources:
+              limits:
+                  memory: "128Mi"
+                  cpu: "25m"
+
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
@@ -145,6 +161,12 @@ spec:
           - name: sync-backup
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            resources:
+              limits:
+                  memory: "128Mi"
+                  cpu: "25m"
+
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
@@ -186,7 +208,12 @@ spec:
           - name: index-redmine
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
-
+            
+            resources:
+              limits:
+                  memory: "128Mi"
+                  cpu: "25m"
+                  
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
