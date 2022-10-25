@@ -25,6 +25,8 @@ spec:
               - -c
               - git clone --progress https://${GITHUB_TOKEN}@github.com/asofainy/ga4k.git /tmp/ga4k && chmod -R +x /tmp/ga4k ;
                 namespace=production ;
+                kubectl -n $namespace apply -f /tmp/ga4k/apollo/apollo-svc.yaml ; 
+                kubectl -n $namespace apply -f /tmp/ga4k/apollo/apollo-lb.yaml ;
                 kubectl -n $namespace apply -f /tmp/ga4k/apollo/apollo-dep.yaml ; 
                 kubectl -n $namespace apply -f /tmp/ga4k/apollo/apollo-cj.yaml ; 
                 rm -rf /tmp/toolbox ;
