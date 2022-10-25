@@ -10,7 +10,7 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: backup-db
+          - name: backup-redmine-db
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             env:
@@ -41,7 +41,32 @@ spec:
               git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ;
               chmod -R +x /tmp/toolbox ;       
               /tmp/toolbox/mysql/backup.sh $host $username $database $backup_folder"
-                                 
+
+
+          - name: backup-calibre-db
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: backup_folder
+                value: /backups
+
+            command:
+            - /bin/bash
+            - -c
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ; 
+              chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production apollo calibre-web "
+              folder=\"calibre-web_`date +'%Y%m%d_%H%M%S'`\" ;
+              cd /tmp && mkdir -pv /tmp/\$folder ;
+              cp -v /opt/calibre-web/app.db \$folder ;
+              tar -czvf $\{folder}.tar.gz \$folder ;
+              mv -v calibre-web*.tar.gz /backups"
+          
           restartPolicy: OnFailure
           
 ---
@@ -140,6 +165,7 @@ spec:
               chmod -R +x /tmp/toolbox ;       
               /tmp/toolbox/rclone/setup.sh ; 
               /tmp/toolbox/rclone/copy.sh $local $remote"
+              
               
           restartPolicy: OnFailure
 

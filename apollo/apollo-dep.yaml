@@ -12,8 +12,8 @@ spec:
       labels:
         app: apollo
     spec:
-      containers:
 
+      containers:
 ####### MySQL
 
       - name: mysql
@@ -21,6 +21,11 @@ spec:
         
         ports:
         - containerPort: 3306
+
+        resources:
+         limits:
+            memory: "512Mi"
+            cpu: "25m"
 
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -35,7 +40,7 @@ spec:
               key: mysql-password
               
         volumeMounts:
-        - name: mysql-restore
+        - name: mysql-data
           mountPath: /var/lib/mysql
           subPath: mysql
           
@@ -49,7 +54,7 @@ spec:
 ####### Redmine
 
       - name: redmine
-        image: asofainy/redmine:v1.1.0-alpha
+        image: asofainy/redmine:v1.1.0
         imagePullPolicy: Always        
 
         env:
@@ -59,8 +64,13 @@ spec:
         ports:
         - containerPort: 3000
 
-        securityContext:
-          privileged: true 
+        resources:
+         limits:
+            memory: "512Mi"
+            cpu: "100m"
+
+#        securityContext:
+#          privileged: true 
 
         volumeMounts:      
         - name: redmine-config
@@ -112,6 +122,7 @@ spec:
         imagePullPolicy: Always
 
         env:
+
           - name:  FLASK_DEBUG
             value: "1"
 
@@ -120,26 +131,35 @@ spec:
 
         ports:
         - containerPort: 8083
+
+        resources:
+         limits:
+            memory: "512Mi"
+            cpu: "25m"
+
         volumeMounts:
 
-        - name: calibre-web-data
-          mountPath: /opt/calibre-web
-          subPath: calibre-web
+#        - name: calibre-web-data
+#          mountPath: /opt/calibre-web
+#          subPath: calibre-web
         
-        - name: calibre-web-data
-          mountPath: /opt/calibre
-          subPath: calibre
+#        - name: calibre-web-data
+#          mountPath: /opt/calibre
+#          subPath: calibre
 
         - name: library
           mountPath: /library
 
+        - name: apollo-backups
+          mountPath: /backups
+          
 ###### Volumes
 
       volumes:
 
-        - name: mysql-restore
+        - name: mysql-data
           persistentVolumeClaim:
-            claimName: mysql-restore-pvc  
+            claimName: mysql-data-pvc 
 
         - name: mysql-config
           configMap:
