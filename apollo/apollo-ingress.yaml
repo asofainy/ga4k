@@ -6,7 +6,7 @@ metadata:
     cloud.google.com/neg: '{"ingress": true}'
 spec:
   rules:
-  - host: redmine.apollo.olympus
+  - host: apollo.olympus.cloud
     http:
       paths:
       - pathType: Prefix
@@ -15,9 +15,9 @@ spec:
           service:
             name : apollo-nodeport
             port :
-              number: 3000
+              name: redmine
 
-  - host: calibre.apollo.olympus
+  - host: apollo.olympus.cloud
     http:
       paths:
       - pathType: Prefix
@@ -26,4 +26,4 @@ spec:
           service:
             name : apollo-nodeport
             port :
-              number: 8083
+              name: calibre-web
