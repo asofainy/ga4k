@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: apollo-backup
 spec:
-  schedule: "0 */2 * * *"
+  schedule: "0 0 * * *"
   jobTemplate:
     spec:
       template:
@@ -16,7 +16,7 @@ spec:
 
             resources:
               limits:
-                  memory: "128Mi"
+                  memory: "64Mi"
                   cpu: "25m"
             
             env:
@@ -52,6 +52,12 @@ spec:
           - name: backup-calibre-db
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            resources:
+              limits:
+                  memory: "64Mi"
+                  cpu: "25m"
+
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
@@ -60,6 +66,7 @@ spec:
                     key: github-token
               - name: backup_folder
                 value: /backups
+                
 
             command:
             - /bin/bash
@@ -78,7 +85,7 @@ kind: CronJob
 metadata:
   name: apollo-sync
 spec:
-  schedule: "15 * * * *"
+  schedule: "0 * * * *"
   jobTemplate:
     spec:
       template:
@@ -92,7 +99,7 @@ spec:
 
             resources:
               limits:
-                  memory: "128Mi"
+                  memory: "64Mi"
                   cpu: "25m"
 
             env:
@@ -127,11 +134,6 @@ spec:
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
 
-            resources:
-              limits:
-                  memory: "128Mi"
-                  cpu: "25m"
-
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
@@ -158,10 +160,6 @@ spec:
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
 
-            resources:
-              limits:
-                  memory: "128Mi"
-                  cpu: "25m"
 
             env:
               - name: GITHUB_TOKEN
@@ -187,6 +185,36 @@ spec:
               
           restartPolicy: OnFailure
 
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: apollo-purge
+spec:
+  schedule: "12 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: redmine-sa
+          containers:
+          - name: purge-redmine
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            
+
+            command:
+            - /bin/bash
+            - -c
+            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; 
+              kubectl exec $pod --namespace production -c redmine -- /bin/bash -l -c "
+              find /backups/* -mtime +1 -exec rm {} \;
+              ls -ltrah /backups "
+              
+          restartPolicy: OnFailure
+          
 ---
 
 apiVersion: batch/v1
@@ -205,10 +233,6 @@ spec:
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             
-            resources:
-              limits:
-                  memory: "128Mi"
-                  cpu: "25m"
                   
             env:
               - name: GITHUB_TOKEN

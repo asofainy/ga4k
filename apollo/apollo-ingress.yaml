@@ -6,6 +6,7 @@ metadata:
     cloud.google.com/neg: '{"ingress": true}'
 spec:
   rules:
+  
   - host: apollo.olympus.cloud
     http:
       paths:
@@ -15,7 +16,7 @@ spec:
           service:
             name : apollo-nodeport
             port :
-              name: redmine
+              name: https-redmine
 
   - host: apollo.olympus.cloud
     http:
