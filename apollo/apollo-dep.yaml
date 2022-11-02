@@ -27,23 +27,23 @@ spec:
             memory: "200Mi"
             cpu: "25m"
 
-        readinessProbe:        
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          exec:
-            command:
-            - service
-            - mysql
-            - status  
+        # readinessProbe:        
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 30
+        #   exec:
+        #     command:
+        #     - service
+        #     - mysql
+        #     - status  
 
-        livenessProbe:        
-          initialDelaySeconds: 60
-          periodSeconds: 300
-          exec:
-            command:
-            - service
-            - mysql
-            - status  
+        # livenessProbe:        
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 300
+        #   exec:
+        #     command:
+        #     - service
+        #     - mysql
+        #     - status  
 
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -90,19 +90,19 @@ spec:
             memory: "500Mi"
             cpu: "100m"
 
-        readinessProbe:        
-          initialDelaySeconds: 900
-          periodSeconds: 60
-          httpGet:
-            path: /
-            port: 3443    
+        # readinessProbe:        
+        #   initialDelaySeconds: 900
+        #   periodSeconds: 60
+        #   httpGet:
+        #     path: /
+        #     port: 3443    
 
-        livenessProbe:        
-          initialDelaySeconds: 1200
-          periodSeconds: 300
-          httpGet:
-            path: /
-            port: 3443
+        # livenessProbe:        
+        #   initialDelaySeconds: 1200
+        #   periodSeconds: 300
+        #   httpGet:
+        #     path: /
+        #     port: 3443
 
 #        securityContext:
 #          privileged: true 
