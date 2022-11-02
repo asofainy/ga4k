@@ -193,7 +193,7 @@ kind: CronJob
 metadata:
   name: apollo-purge
 spec:
-  schedule: "12 * * * *"
+  schedule: "0 0 * * *"
   jobTemplate:
     spec:
       template:
@@ -210,7 +210,7 @@ spec:
             - -c
             - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; 
               kubectl exec $pod --namespace production -c redmine -- /bin/bash -l -c "
-              find /backups/* -mtime +1 -exec rm {} \;
+              find /backups/* -mtime +1 -exec rm {} \; ;
               ls -ltrah /backups "
               
           restartPolicy: OnFailure
