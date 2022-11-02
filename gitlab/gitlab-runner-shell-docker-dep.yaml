@@ -34,14 +34,6 @@ spec:
         - name: gitlab-config
           mountPath: /etc/gitlab/gitlab.rb
           subPath: gitlab.rb
-        
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "50m"
-          limits:
-            memory: "256Mi"
-            cpu: "75m"
 
       volumes:
         - name: socket

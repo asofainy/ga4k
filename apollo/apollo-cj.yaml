@@ -3,16 +3,22 @@ kind: CronJob
 metadata:
   name: apollo-backup
 spec:
-  schedule: "0 */2 * * *"
+  schedule: "0 0 * * *"
   jobTemplate:
     spec:
       template:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: backup-db
+          - name: backup-redmine-db
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            resources:
+              limits:
+                  memory: "64Mi"
+                  cpu: "25m"
+            
             env:
               - name: app
                 value: redmine
@@ -41,7 +47,35 @@ spec:
               git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ;
               chmod -R +x /tmp/toolbox ;       
               /tmp/toolbox/mysql/backup.sh $host $username $database $backup_folder"
-                                 
+
+
+          - name: backup-calibre-db
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+
+            resources:
+              limits:
+                  memory: "64Mi"
+                  cpu: "25m"
+
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+              - name: backup_folder
+                value: /backups
+                
+
+            command:
+            - /bin/bash
+            - -c
+            - git clone --branch dev --progress https://${GITHUB_TOKEN}@github.com/asofainy/toolbox.git /tmp/toolbox ; 
+              chmod -R +x /tmp/toolbox ;
+              /tmp/toolbox/kubectl/run.sh production apollo calibre-web "
+              tar -czvf /backups/calibre-web_`date +'%Y%m%d_%H%M%S'`.tar.gz /opt/calibre-web/app.db ;"
+          
           restartPolicy: OnFailure
           
 ---
@@ -51,7 +85,7 @@ kind: CronJob
 metadata:
   name: apollo-sync
 spec:
-  schedule: "15 * * * *"
+  schedule: "0 * * * *"
   jobTemplate:
     spec:
       template:
@@ -62,6 +96,11 @@ spec:
           - name: sync-repo
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+            resources:
+              limits:
+                  memory: "64Mi"
+                  cpu: "25m"
 
             env:
               - name: GITHUB_TOKEN
@@ -120,6 +159,8 @@ spec:
           - name: sync-backup
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
+
+
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
@@ -141,8 +182,39 @@ spec:
               /tmp/toolbox/rclone/setup.sh ; 
               /tmp/toolbox/rclone/copy.sh $local $remote"
               
+              
           restartPolicy: OnFailure
 
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: apollo-purge
+spec:
+  schedule: "12 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: redmine-sa
+          containers:
+          - name: purge-redmine
+            image: bitnami/kubectl:latest
+            imagePullPolicy: IfNotPresent
+            
+
+            command:
+            - /bin/bash
+            - -c
+            - pod=$(kubectl get pods -n production -l app=apollo --field-selector status.phase=Running | cut -f1 -d ' ' | tail -n 1 ) ; 
+              kubectl exec $pod --namespace production -c redmine -- /bin/bash -l -c "
+              find /backups/* -mtime +1 -exec rm {} \;
+              ls -ltrah /backups "
+              
+          restartPolicy: OnFailure
+          
 ---
 
 apiVersion: batch/v1
@@ -160,7 +232,8 @@ spec:
           - name: index-redmine
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
-
+            
+                  
             env:
               - name: GITHUB_TOKEN
                 valueFrom:

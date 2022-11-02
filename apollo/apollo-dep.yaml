@@ -12,13 +12,38 @@ spec:
       labels:
         app: apollo
     spec:
+
       containers:
-      
+####### MySQL
+
       - name: mysql
         image: mysql:5.7-debian
         
         ports:
         - containerPort: 3306
+
+        resources:
+         limits:
+            memory: "200Mi"
+            cpu: "25m"
+
+        readinessProbe:        
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          exec:
+            command:
+            - service
+            - mysql
+            - status  
+
+        livenessProbe:        
+          initialDelaySeconds: 60
+          periodSeconds: 300
+          exec:
+            command:
+            - service
+            - mysql
+            - status  
 
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -33,7 +58,7 @@ spec:
               key: mysql-password
               
         volumeMounts:
-        - name: mysql-restore
+        - name: mysql-data
           mountPath: /var/lib/mysql
           subPath: mysql
           
@@ -41,40 +66,63 @@ spec:
           mountPath: /etc/mysql/mysql.cnf
           subPath: mysql.cnf
 
-        - name: backups
+        - name: apollo-backups
           mountPath: /backups
 
+####### Redmine
 
       - name: redmine
-        image: asofainy/redmine:v1.1.0
+        image: asofainy/redmine:latest
         imagePullPolicy: Always        
 
         env:
         - name: RAILS_ENV
           value: production
+        - name: HTTPS_PORT
+          value: "3443"
 
         ports:
-        - containerPort: 3000
+        - name: https-redmine
+          containerPort: 3443
 
-        securityContext:
-          privileged: true 
+        resources:
+         limits:
+            memory: "500Mi"
+            cpu: "100m"
 
-        volumeMounts:
+        # readinessProbe:        
+        #   initialDelaySeconds: 1200
+        #   periodSeconds: 60
+        #   httpGet:
+        #     path: /
+        #     port: 3443    
+
+        # livenessProbe:        
+        #   initialDelaySeconds: 500
+        #   periodSeconds: 300
+        #   httpGet:
+        #     path: /
+        #     port: 3443
+
+#        securityContext:
+#          privileged: true 
+
+        volumeMounts:      
         - name: redmine-config
           mountPath: /usr/src/redmine/config/configuration.yml
           subPath: configuration.yml
         - name: redmine-config
           mountPath: /usr/src/redmine/config/database.yml
           subPath: database.yml
-        - name: redmine-config
+        - name: redmine-config       
           mountPath: /usr/src/redmine/config/settings.yml
           subPath: settings.yml
         - name: redmine-config
           mountPath: /usr/src/redmine/config/application.rb
           subPath: application.rb
         - name: redmine-config
-          mountPath: /config/env.yml
-          subPath: env.yml
+          mountPath: /usr/src/redmine/Gemfile
+          subPath: Gemfile
         - name: redmine-config
           mountPath: /etc/ImageMagick-6/policy.xml
           subPath: policy.xml
@@ -85,74 +133,109 @@ spec:
         - name: redmine-files
           mountPath: /usr/src/redmine/file_index
           subPath: file_index
+
         - name: redmine-repo
           mountPath: /repositories
+
         - name: library
           mountPath: /library
-        - name: mysql-config
-          mountPath: /mnt/etc/mysql
-        - name: mysql-restore
-          mountPath: /mnt/var/lib/mysql
-        - name: backups
+
+        - name: apollo-backups
           mountPath: /backups
 
-      - name: calibre-web
-        image: debian:11.5
-        imagePullPolicy: IfNotPresent
-        env:
-          - name: CALIBRE_VERSION
-            value: 6.7.1
-          - name: CALIBRE_WEB_VERSION
-            value: 0.6.12
-          - name: FLASK_DEBUG
-            value: "1"
-          - name: CALIBRE_DBPATH
-            value: /opt/calibre-web
-          - name: GITHUB_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: apollo-secrets
-                key: github-token
+#        - name: mysql-config
+#          mountPath: /mnt/etc/mysql
+#        - name: mysql-restore
+#          mountPath: /mnt/var/lib/mysql
 
-        command: ["/bin/bash","-c"]
-        args: 
-          - apt-get -qqq update && apt-get -qqq  install -y git | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
-            git clone -b build --progress https://${GITHUB_TOKEN}@github.com/asofainy/calibre-web.git /tmp/calibre-web | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;
-            chmod -R +x /tmp/calibre-web/run/install.sh && /tmp/calibre-web/run/install.sh | sed -u "s/.*/` printf "calibre-web  |" ` &/" ;         
+
+####### Calibre Web
+
+
+      - name: calibre-web
+        image: asofainy/calibre-web:latest
+        imagePullPolicy: Always
+
+        env:
+
+          - name:  FLASK_DEBUG
+            value: "1"
+
+          - name:  CALIBRE_DBPATH
+            value: /opt/calibre-web
 
         ports:
-        - containerPort: 8083
+        - name: http-calibre
+          containerPort: 8083
+
+        resources:
+          limits:
+            memory: "200Mi"
+            cpu: "50m"
+
+        readinessProbe:        
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          httpGet:
+            path: /
+            port: 8083
+
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 300
+          httpGet:
+            path: /
+            port: 8083
+
+
         volumeMounts:
+
         - name: library
           mountPath: /library
-        - name: calibre-data
-          mountPath: /opt
+
+        - name: apollo-backups
+          mountPath: /backups
+
+#        - name: calibre-web-data
+#          mountPath: /opt/calibre-web
+#          subPath: calibre-web
+        
+#        - name: calibre-web-data
+#          mountPath: /opt/calibre
+#          subPath: calibre
+          
+###### Volumes
 
       volumes:
-        - name: redmine-repo
+
+        - name: mysql-data
           persistentVolumeClaim:
-            claimName: redmine-repo-pvc
-        - name: library
-          persistentVolumeClaim:
-            claimName: library-pvc
-        - name: redmine-config
-          configMap:
-            name: redmine-config
-        - name: redmine-files
-          persistentVolumeClaim:
-            claimName: redmine-files-pvc
-        - name: calibre-data
-          persistentVolumeClaim:
-            claimName: calibre-data-pvc
-        - name: calibre-web-data
-          persistentVolumeClaim:
-            claimName: calibre-web-data-pvc
-        - name: mysql-restore
-          persistentVolumeClaim:
-            claimName: mysql-restore-pvc     
+            claimName: mysql-data-pvc 
+
         - name: mysql-config
           configMap:
             name: mysql-config
-        - name: backups
+
+        - name: redmine-repo
           persistentVolumeClaim:
-            claimName: backups-pvc   
+            claimName: redmine-repo-pvc
+
+        - name: redmine-config
+          configMap:
+            name: redmine-config
+
+        - name: redmine-files
+          persistentVolumeClaim:
+            claimName: redmine-files-pvc
+
+        - name: calibre-web-data
+          persistentVolumeClaim:
+            claimName: calibre-web-data-pvc
+        
+        - name: library
+          persistentVolumeClaim:
+            claimName: library-pvc
+
+        - name: apollo-backups
+          persistentVolumeClaim:
+            claimName: apollo-backups-pvc   
