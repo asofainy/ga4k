@@ -23,27 +23,28 @@ spec:
         - containerPort: 3306
 
         resources:
-         limits:
+          limits:
             memory: "200Mi"
             cpu: "25m"
 
-        # readinessProbe:        
-        #   initialDelaySeconds: 30
-        #   periodSeconds: 30
-        #   exec:
-        #     command:
-        #     - service
-        #     - mysql
-        #     - status  
+        readinessProbe:        
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          exec:
+            command:
+            - bash
+            - -c
+            - mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
 
-        # livenessProbe:        
-        #   initialDelaySeconds: 60
-        #   periodSeconds: 300
-        #   exec:
-        #     command:
-        #     - service
-        #     - mysql
-        #     - status  
+        livenessProbe:        
+          initialDelaySeconds: 60
+          periodSeconds: 300
+          exec:
+            command:
+            - bash
+            - -c
+            - mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
+
 
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -69,11 +70,15 @@ spec:
         - name: apollo-backups
           mountPath: /backups
 
+        - name: calibre-web-data
+          mountPath: /mnt/opt  
+        
+      
 ####### Redmine
 
       - name: redmine
-        image: asofainy/redmine:latest
-        imagePullPolicy: Always        
+        image: asofainy/redmine:v1.2.0
+#        imagePullPolicy: Always        
 
         env:
         - name: RAILS_ENV
@@ -90,19 +95,21 @@ spec:
             memory: "500Mi"
             cpu: "100m"
 
-        # readinessProbe:        
-        #   initialDelaySeconds: 900
-        #   periodSeconds: 60
-        #   httpGet:
-        #     path: /
-        #     port: 3443    
+        readinessProbe:        
+          initialDelaySeconds: 900
+          periodSeconds: 60
+          httpGet:
+            scheme: HTTPS
+            path: /
+            port: 3443    
 
-        # livenessProbe:        
-        #   initialDelaySeconds: 1200
-        #   periodSeconds: 300
-        #   httpGet:
-        #     path: /
-        #     port: 3443
+        livenessProbe:        
+          initialDelaySeconds: 300
+          periodSeconds: 300
+          httpGet:
+            scheme: HTTPS 
+            path: /
+            port: 3443
 
 #        securityContext:
 #          privileged: true 
@@ -143,6 +150,10 @@ spec:
         - name: apollo-backups
           mountPath: /backups
 
+        - name: redmine-ssl
+          mountPath: /usr/src/redmine/ssl
+          readOnly: true
+
 #        - name: mysql-config
 #          mountPath: /mnt/etc/mysql
 #        - name: mysql-restore
@@ -151,21 +162,18 @@ spec:
 
 ####### Calibre Web
 
-
       - name: calibre-web
-        image: asofainy/calibre-web:latest
-        imagePullPolicy: Always
+        image: asofainy/calibre-web:v1.0.0
+#        imagePullPolicy: Always
 
         env:
-
           - name:  FLASK_DEBUG
             value: "1"
-
           - name:  CALIBRE_DBPATH
             value: /opt/calibre-web
 
         ports:
-        - name: http-calibre
+        - name: https-calibre
           containerPort: 8083
 
         resources:
@@ -177,6 +185,7 @@ spec:
           initialDelaySeconds: 120
           periodSeconds: 60
           httpGet:
+            scheme: HTTPS
             path: /
             port: 8083
 
@@ -184,6 +193,7 @@ spec:
           initialDelaySeconds: 300
           periodSeconds: 300
           httpGet:
+            scheme: HTTPS
             path: /
             port: 8083
 
@@ -196,15 +206,14 @@ spec:
         - name: apollo-backups
           mountPath: /backups
 
-#        - name: calibre-web-data
-#          mountPath: /opt/calibre-web
-#          subPath: calibre-web
-        
-#        - name: calibre-web-data
-#          mountPath: /opt/calibre
-#          subPath: calibre
-          
-###### Volumes
+        - name: calibre-web-data
+          mountPath: /opt/calibre-web/app.db
+          subPath: calibre-web/app.db
+
+        - name: calibre-web-ssl
+          mountPath: /opt/calibre-web/ssl
+          readOnly: true
+       
 
       volumes:
 
@@ -239,3 +248,11 @@ spec:
         - name: apollo-backups
           persistentVolumeClaim:
             claimName: apollo-backups-pvc   
+
+        - name: redmine-ssl
+          secret:
+            secretName: redmine-secrets
+
+        - name: calibre-web-ssl
+          secret:
+            secretName: calibre-web-secrets

@@ -11,6 +11,6 @@ spec:
   - name: https-redmine
     port: 3443
     targetPort: 3443
-  - name: http-calibre
+  - name: https-calibre
     port: 8083
     targetPort: 8083
