@@ -14,7 +14,8 @@ spec:
     spec:
 
       containers:
-####### MySQL
+
+# Container : MySQL
 
       - name: mysql
         image: mysql:5.7-debian
@@ -28,8 +29,6 @@ spec:
             cpu: "25m"
 
         readinessProbe:        
-          initialDelaySeconds: 30
-          periodSeconds: 30
           exec:
             command:
             - bash
@@ -38,7 +37,6 @@ spec:
 
         livenessProbe:        
           initialDelaySeconds: 60
-          periodSeconds: 300
           exec:
             command:
             - bash
@@ -72,13 +70,11 @@ spec:
 
         - name: calibre-web-data
           mountPath: /mnt/opt  
-        
-      
-####### Redmine
+              
+# Container : Redmine
 
       - name: redmine
-        image: asofainy/redmine:v1.2.0
-#        imagePullPolicy: Always        
+        image: asofainy/redmine:v1.2.0       
 
         env:
         - name: RAILS_ENV
@@ -92,27 +88,24 @@ spec:
 
         resources:
          limits:
-            memory: "500Mi"
-            cpu: "100m"
+            memory: "512Mi"
+            cpu: "200m" 
 
-        readinessProbe:        
-          initialDelaySeconds: 900
-          periodSeconds: 60
-          httpGet:
-            scheme: HTTPS
-            path: /
-            port: 3443    
+        # livenessProbe:        
+        #    initialDelaySeconds: 1800 # 30 min
+        #    periodSeconds: 300
+        #    httpGet:
+        #      scheme: HTTPS 
+        #      path: /
+        #      port: 3443
 
-        livenessProbe:        
-          initialDelaySeconds: 300
-          periodSeconds: 300
-          httpGet:
-            scheme: HTTPS 
-            path: /
-            port: 3443
-
-#        securityContext:
-#          privileged: true 
+        #readinessProbe:        
+        #  initialDelaySeconds: 1200 # 20 min
+        #  periodSeconds: 60
+        #    httpGet:
+        #      scheme: HTTPS
+        #      path: /
+        #      port: 3443   
 
         volumeMounts:      
         - name: redmine-config
@@ -154,17 +147,10 @@ spec:
           mountPath: /usr/src/redmine/ssl
           readOnly: true
 
-#        - name: mysql-config
-#          mountPath: /mnt/etc/mysql
-#        - name: mysql-restore
-#          mountPath: /mnt/var/lib/mysql
-
-
-####### Calibre Web
+# Container : Calibre Web
 
       - name: calibre-web
         image: asofainy/calibre-web:v1.0.0
-#        imagePullPolicy: Always
 
         env:
           - name:  FLASK_DEBUG
@@ -181,22 +167,21 @@ spec:
             memory: "200Mi"
             cpu: "50m"
 
-        readinessProbe:        
-          initialDelaySeconds: 120
-          periodSeconds: 60
-          httpGet:
-            scheme: HTTPS
-            path: /
-            port: 8083
+        # livenessProbe:
+        #   initialDelaySeconds: 120
+        #   #  periodSeconds: 900
+        #   httpGet:
+        #     scheme: HTTPS
+        #     path: /
+        #     port: 8083
 
-        livenessProbe:
-          initialDelaySeconds: 300
-          periodSeconds: 300
-          httpGet:
-            scheme: HTTPS
-            path: /
-            port: 8083
-
+        #readinessProbe:        
+          # initialDelaySeconds: 60
+          # periodSeconds: 60
+         # httpGet:
+        #      scheme: HTTPS
+        #      path: /
+        #      port: 8083
 
         volumeMounts:
 
@@ -214,7 +199,6 @@ spec:
           mountPath: /opt/calibre-web/ssl
           readOnly: true
        
-
       volumes:
 
         - name: mysql-data

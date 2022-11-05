@@ -27,4 +27,4 @@ spec:
           service:
             name : apollo-nodeport
             port :
-              name: calibre-web
+              name: https-calibre
