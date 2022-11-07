@@ -74,7 +74,7 @@ spec:
 # Container : Redmine
 
       - name: redmine
-        image: asofainy/redmine:v1.2.0       
+        image: asofainy/redmine:ssl      
 
         env:
         - name: RAILS_ENV
