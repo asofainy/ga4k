@@ -74,7 +74,8 @@ spec:
 # Container : Redmine
 
       - name: redmine
-        image: asofainy/redmine:ssl      
+        image: asofainy/redmine:v1.2.0      
+        imagePullPolicy: Always
 
         env:
         - name: RAILS_ENV
