@@ -28,20 +28,20 @@ spec:
             memory: "200Mi"
             cpu: "25m"
 
-        readinessProbe:        
-          exec:
-            command:
-            - bash
-            - -c
-            - mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
+        # readinessProbe:        
+        #   exec:
+        #     command:
+        #     - bash
+        #     - -c
+        #     - mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
 
-        livenessProbe:        
-          initialDelaySeconds: 60
-          exec:
-            command:
-            - bash
-            - -c
-            - mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
+        # livenessProbe:        
+        #   initialDelaySeconds: 60
+        #   exec:
+        #     command:
+        #     - bash
+        #     - -c
+        #     - mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD ping &> /dev/null
 
 
         env:

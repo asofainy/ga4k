@@ -16,8 +16,8 @@ spec:
 
             resources:
               limits:
-                  memory: "64Mi"
-                  cpu: "25m"
+                  memory: "16Mi"
+                  cpu: "5m"
             
             env:
               - name: app
@@ -55,8 +55,8 @@ spec:
 
             resources:
               limits:
-                  memory: "64Mi"
-                  cpu: "25m"
+                  memory: "16Mi"
+                  cpu: "5m"
 
             env:
               - name: GITHUB_TOKEN
@@ -99,8 +99,8 @@ spec:
 
             resources:
               limits:
-                  memory: "64Mi"
-                  cpu: "25m"
+                  memory: "16Mi"
+                  cpu: "5m"
 
             env:
               - name: GITHUB_TOKEN
@@ -204,6 +204,10 @@ spec:
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             
+            resources:
+              limits:
+                  memory: "16Mi"
+                  cpu: "5m"
 
             command:
             - /bin/bash
@@ -233,7 +237,11 @@ spec:
             image: bitnami/kubectl:latest
             imagePullPolicy: IfNotPresent
             
-                  
+            resources:
+              limits:
+                  memory: "16Mi"
+                  cpu: "5m"     
+                            
             env:
               - name: GITHUB_TOKEN
                 valueFrom:
