@@ -16,8 +16,8 @@ spec:
          
             resources:
               limits:
-                  memory: "512Mi"
-                  cpu: "100m"
+                  memory: "64Mi"
+                  cpu: "10m"
                   
             env:
               - name: GITHUB_TOKEN
