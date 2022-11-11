@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   namespace: production
-  name: create-applications
+  name: apollo-start
 spec:
   schedule: 0 0 * * *  
   jobTemplate:
@@ -11,7 +11,7 @@ spec:
         spec:
           serviceAccountName: redmine-sa
           containers:
-          - name: create-applications
+          - name: start
             image: bitnami/kubectl:latest
          
             resources:
@@ -35,6 +35,48 @@ spec:
                 kubectl -n $namespace apply -f /tmp/ga4k/apollo/apollo-lb.yaml ;
                 kubectl -n $namespace apply -f /tmp/ga4k/apollo/apollo-dep.yaml ; 
                 kubectl -n $namespace apply -f /tmp/ga4k/apollo/apollo-cj.yaml ; 
+                rm -rf /tmp/toolbox ;
+
+          restartPolicy: OnFailure
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  namespace: production
+  name: apollo-stop
+spec:
+  schedule: 0 3 * * *  
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: redmine-sa
+          containers:
+          - name: stop
+            image: bitnami/kubectl:latest
+         
+            resources:
+              limits:
+                  memory: "64Mi"
+                  cpu: "10m"
+                  
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: apollo-secrets
+                    key: github-token
+
+            command:
+              - /bin/bash
+              - -c
+              - git clone --progress https://${GITHUB_TOKEN}@github.com/asofainy/ga4k.git /tmp/ga4k && chmod -R +x /tmp/ga4k ;
+                namespace=production ;
+                kubectl -n $namespace delete deployment --all ;
+                kubectl -n $namespace delete cj apollo-sync apollo-index apollo-backup apollo-purge ;
+                kubectl -n $namespace delete svc --all ;
                 rm -rf /tmp/toolbox ;
 
           restartPolicy: OnFailure
